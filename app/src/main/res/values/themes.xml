@@ -1,5 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="AppTheme" parent="MaterialTheme">
+    <!--
+         Use a Material 3 parent to ensure proper theming support. The previous
+         parent "MaterialTheme" is a Jetpack Compose theme and causes a runtime
+         crash when used from XML. This style is referenced from the manifest and
+         can be customised as needed.
+    -->
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
     </style>
 </resources>
