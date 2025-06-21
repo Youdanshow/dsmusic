@@ -105,4 +105,11 @@ Ajouter la persistance (SharedPreferences ou Room).
 
 Polir l’interface avec Jetpack Compose ou XML.
 
+mode dev sur téléphone - debugger usb activer auto block desactivé
+
 & "C:\Users\damie\OneDrive\Bureau\gradle-8.7-bin\gradle-8.7\bin\gradle.bat" wrapper --gradle-version 8.7
+./gradlew clean build
+& "C:\Users\damie\AppData\Local\Android\Sdk\platform-tools\adb.exe" shell am start -n com.example.dsmusic/.MainActivity
+& "C:\Users\damie\AppData\Local\Android\Sdk\platform-tools\adb.exe" devices
+./gradlew installDebug
+ 
