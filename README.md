@@ -105,6 +105,8 @@ Ajouter la persistance (SharedPreferences ou Room).
 
 Polir l’interface avec Jetpack Compose ou XML.
 
+# Setup
+
 mode dev sur téléphone - debugger usb activer auto block desactivé
 
 & "C:\Users\damie\OneDrive\Bureau\gradle-8.7-bin\gradle-8.7\bin\gradle.bat" wrapper --gradle-version 8.7
