@@ -67,7 +67,7 @@
 1. Mode développeur sur téléphone : activer le débogage USB et désactiver le blocage automatique.
 2. Utiliser `gradle` version 8.7 :
    ```bash
-   <path-to-gradle>/gradle.bat wrapper --gradle-version 8.7
+   & "<path-to-gradle>"/gradle.bat wrapper --gradle-version 8.7
    ```
 3. Construire le projet :
    ```bash
@@ -75,17 +75,17 @@
    ```
 4. Lancer l’application sur l’appareil :
    ```bash
-   <path-to-adb>/adb shell am start -n com.example.dsmusic/.MainActivity
+   & "<path-to-adb>"/adb shell am start -n com.example.dsmusic/.MainActivity
    ```
 5. Vérifier les appareils connectés puis installer l’APK :
    ```bash
-   <path-to-adb>/adb devices
+   & "<path-to-adb>"/adb devices
    ./gradlew installDebug
    ```
 6. En cas de problème de connexion USB :
    ```bash
-   <path-to-adb>/adb kill-server
-   <path-to-adb>/adb start-server
-   <path-to-adb>/adb devices
+   & "<path-to-adb>"/adb kill-server
+   & "<path-to-adb>"/adb start-server
+   & "<path-to-adb>"/adb devices
    ./gradlew installDebug
    ```
