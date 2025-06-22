@@ -118,4 +118,16 @@ mode dev sur téléphone - debugger usb activer auto block desactivé
 & "C:\Users\damie\AppData\Local\Android\Sdk\platform-tools\adb.exe" devices
 
 ./gradlew installDebug
- 
+
+ si bug sur la connexion avec le teléphone - révoker les autorisations de débogage usb
+
+ & "C:\Users\damie\AppData\Local\Android\Sdk\platform-tools\adb.exe" kill-server
+
+ & "C:\Users\damie\AppData\Local\Android\Sdk\platform-tools\adb.exe" start server
+
+ & "C:\Users\damie\AppData\Local\Android\Sdk\platform-tools\adb.exe" devices
+
+./gradlew installDebug
+
+
+
