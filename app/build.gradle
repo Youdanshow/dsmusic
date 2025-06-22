@@ -28,11 +28,6 @@ android {
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
-
 dependencies {
     implementation platform('androidx.compose:compose-bom:2024.05.00')
 
