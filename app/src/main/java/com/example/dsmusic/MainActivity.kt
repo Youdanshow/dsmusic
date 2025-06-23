@@ -333,7 +333,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNotification(song: Song) {
-        val toggleIntent = Intent(ACTION_TOGGLE_PLAY)
+        val toggleIntent = Intent(ACTION_TOGGLE_PLAY).apply {
+            `package` = packageName
+        }
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         } else {
