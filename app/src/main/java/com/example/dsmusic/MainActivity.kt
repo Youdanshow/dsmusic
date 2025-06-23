@@ -3,9 +3,6 @@ package com.example.dsmusic
 import android.Manifest
 import android.content.Intent
 import android.media.MediaPlayer
-import android.media.audiofx.BassBoost
-import android.media.audiofx.Equalizer
-import android.media.audiofx.Virtualizer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -28,9 +25,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private var mediaPlayer: MediaPlayer? = null
-    private var equalizer: Equalizer? = null
-    private var bassBoost: BassBoost? = null
-    private var virtualizer: Virtualizer? = null
     private lateinit var seekBar: SeekBar
     private lateinit var txtCurrentTime: TextView
     private lateinit var txtTotalTime: TextView
@@ -93,13 +87,6 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        findViewById<Button>(R.id.btnEqualizer).setOnClickListener {
-            mediaPlayer?.let {
-                val intent = Intent(this, EqualizerActivity::class.java)
-                intent.putExtra("AUDIO_SESSION_ID", it.audioSessionId)
-                startActivity(intent)
-            }
-        }
 
         findViewById<Button>(R.id.btnPlaylists).setOnClickListener {
             val intent = Intent(this, PlaylistActivity::class.java)
@@ -193,24 +180,6 @@ class MainActivity : AppCompatActivity() {
 
         btnPlayPause.text = "⏸️"
 
-        // Release previous effects
-        equalizer?.release()
-        bassBoost?.release()
-        virtualizer?.release()
-
-        equalizer = Equalizer(0, mediaPlayer!!.audioSessionId).apply {
-            enabled = true
-        }
-
-        bassBoost = BassBoost(0, mediaPlayer!!.audioSessionId).apply {
-            setStrength(800.toShort())
-            enabled = true
-        }
-
-        virtualizer = Virtualizer(0, mediaPlayer!!.audioSessionId).apply {
-            setStrength(800.toShort())
-            enabled = true
-        }
         Toast.makeText(this, "Lecture : ${song.title}", Toast.LENGTH_SHORT).show()
     }
 
@@ -273,8 +242,5 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
-        equalizer?.release()
-        bassBoost?.release()
-        virtualizer?.release()
     }
 }
