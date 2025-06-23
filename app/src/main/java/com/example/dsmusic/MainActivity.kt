@@ -35,6 +35,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var seekBar: SeekBar
     private lateinit var txtCurrentTime: TextView
     private lateinit var txtTotalTime: TextView
+    private lateinit var btnPlayPause: Button
+    private lateinit var btnNext: Button
+    private lateinit var btnPrev: Button
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: MutableList<Song>
     private var currentIndex = 0
@@ -49,6 +52,9 @@ class MainActivity : AppCompatActivity() {
         seekBar = findViewById(R.id.seekBar)
         txtCurrentTime = findViewById(R.id.txtCurrentTime)
         txtTotalTime = findViewById(R.id.txtTotalTime)
+        btnPlayPause = findViewById(R.id.btnPlayPause)
+        btnNext = findViewById(R.id.btnNext)
+        btnPrev = findViewById(R.id.btnPrev)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), 1)
@@ -91,6 +97,20 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnPlaylists).setOnClickListener {
             val intent = Intent(this, PlaylistActivity::class.java)
             startActivity(intent)
+        }
+
+        btnNext.setOnClickListener { nextSong() }
+        btnPrev.setOnClickListener { previousSong() }
+        btnPlayPause.setOnClickListener {
+            mediaPlayer?.let {
+                if (it.isPlaying) {
+                    it.pause()
+                    btnPlayPause.text = "▶️"
+                } else {
+                    it.start()
+                    btnPlayPause.text = "⏸️"
+                }
+            }
         }
 
         val btnShuffle = findViewById<Button>(R.id.btnShuffle)
@@ -142,6 +162,8 @@ class MainActivity : AppCompatActivity() {
             updateSeekBar()
         }
 
+        btnPlayPause.text = "⏸️"
+
         // Release previous effects
         equalizer?.release()
         bassBoost?.release()
@@ -175,6 +197,25 @@ class MainActivity : AppCompatActivity() {
 
         if (repeatMode == 0 && currentIndex == 0 && !isShuffling) {
             Toast.makeText(this, "Fin de la playlist", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        playSong(songs[currentIndex])
+    }
+
+    private fun previousSong() {
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+
+        val atFirst = currentIndex == 0
+        currentIndex = if (isShuffling) {
+            (songs.indices - currentIndex).random()
+        } else {
+            if (currentIndex - 1 < 0) songs.size - 1 else currentIndex - 1
+        }
+
+        if (repeatMode == 0 && atFirst && !isShuffling) {
+            Toast.makeText(this, "Début de la playlist", Toast.LENGTH_SHORT).show()
             return
         }
 
