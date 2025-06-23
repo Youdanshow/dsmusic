@@ -6,6 +6,9 @@ import android.media.MediaPlayer
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 import androidx.core.app.NotificationCompat
 import android.os.Build
 import android.os.Bundle
@@ -53,10 +56,30 @@ class MainActivity : AppCompatActivity() {
     private lateinit var notificationBuilder: NotificationCompat.Builder
     private val CHANNEL_ID = "music_playback"
     private val NOTIFICATION_ID = 1
+    private val ACTION_TOGGLE_PLAY = "com.example.dsmusic.TOGGLE_PLAY"
+
+    private val toggleReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            mediaPlayer?.let {
+                if (it.isPlaying) {
+                    it.pause()
+                    btnPlayPause.text = "\u25B6\uFE0F"
+                } else {
+                    it.start()
+                    btnPlayPause.text = "\u23F8\uFE0F"
+                }
+                songs.getOrNull(currentIndex)?.let { song ->
+                    showNotification(song)
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        registerReceiver(toggleReceiver, IntentFilter(ACTION_TOGGLE_PLAY))
 
         recyclerView = findViewById(R.id.recyclerSongs)
         seekBar = findViewById(R.id.seekBar)
@@ -304,13 +327,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNotification(song: Song) {
+        val toggleIntent = Intent(ACTION_TOGGLE_PLAY)
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val togglePending = PendingIntent.getBroadcast(this, 0, toggleIntent, flags)
+        val playIcon = if (mediaPlayer?.isPlaying == true) {
+            android.R.drawable.ic_media_pause
+        } else {
+            android.R.drawable.ic_media_play
+        }
         notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(song.title)
             .setContentText(song.artist)
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setProgress(seekBar.max, 0, false)
+            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Lire", togglePending)
+            .setProgress(seekBar.max, seekBar.progress, false)
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
@@ -319,5 +355,6 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
         notificationManager.cancel(NOTIFICATION_ID)
+        unregisterReceiver(toggleReceiver)
     }
 }
