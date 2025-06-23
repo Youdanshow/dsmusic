@@ -10,6 +10,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -79,7 +80,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        registerReceiver(toggleReceiver, IntentFilter(ACTION_TOGGLE_PLAY))
+        ContextCompat.registerReceiver(
+            this,
+            toggleReceiver,
+            IntentFilter(ACTION_TOGGLE_PLAY),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
 
         recyclerView = findViewById(R.id.recyclerSongs)
         seekBar = findViewById(R.id.seekBar)
