@@ -16,7 +16,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.dsmusic.EqualizerActivity" />
         <activity android:name="com.example.dsmusic.PlaylistActivity" />
     </application>
 </manifest>

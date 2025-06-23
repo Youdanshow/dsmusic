@@ -9,15 +9,16 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <Button
-        android:id="@+id/btnEqualizer"
-        android:text="Égaliseur"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/btnPlaylists"
         android:text="🎵 Playlists"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnSearch"
+        android:text="🔍 Rechercher"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

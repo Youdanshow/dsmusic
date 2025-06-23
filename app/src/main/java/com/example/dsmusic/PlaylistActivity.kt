@@ -45,5 +45,9 @@ class PlaylistActivity : AppCompatActivity() {
                 .setNegativeButton("Annuler", null)
                 .show()
         }
+
+        findViewById<Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
     }
 }

@@ -11,13 +11,11 @@
   - Mode répétition (titre ou playlist)
   - Barre de progression
   - Affichage des métadonnées (titre, artiste, pochette)
-- **Égaliseur intégré**
-  - Présets : Classique, Rock, Pop, Jazz, etc.
-  - Réglage manuel (5 bandes ou plus)
-  - Contrôle du Bass Boost et du Virtualizer
 - **Playlists personnalisées**
   - Création et suppression de playlists
   - Ajout ou retrait de musiques aux playlists
+- **Recherche de musiques**
+  - Bouton de recherche dans le menu principal pour filtrer la liste
 - **Interface utilisateur**
   - Design simple, fluide et responsive
   - Thème sombre ou clair
@@ -29,7 +27,6 @@
   - Android SDK (API ≥ 24)
 - **Lecteur audio** : MediaPlayer ou ExoPlayer
 - **Scan des fichiers** : MediaStore API
-- **Égaliseur audio** : `android.media.audiofx.Equalizer`, `BassBoost` et `Virtualizer`
 - **Métadonnées** : `MediaMetadataRetriever`
 - **UI/UX**
   - Jetpack Compose ou XML
@@ -44,7 +41,6 @@
 │   ├── MainActivity.kt
 │   ├── PlayerFragment.kt
 │   ├── PlaylistFragment.kt
-│   └── EqualizerFragment.kt
 ├── model/
 │   └── Song.kt
 ├── utils/
@@ -58,10 +54,9 @@
 2. Afficher les chansons dans une liste.
 3. Créer un service de fond pour la lecture audio.
 4. Créer une UI de lecture avec les contrôles de base.
-5. Ajouter l’égaliseur audio.
-6. Gérer les playlists et les favoris.
-7. Ajouter la persistance (SharedPreferences ou Room).
-8. Polir l’interface avec Jetpack Compose ou XML.
+5. Gérer les playlists et les favoris.
+6. Ajouter la persistance (SharedPreferences ou Room).
+7. Polir l’interface avec Jetpack Compose ou XML.
 
 ## Setup
 1. Mode développeur sur téléphone : activer le débogage USB et désactiver le blocage automatique.
