@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPlayPause: Button
     private lateinit var btnNext: Button
     private lateinit var btnPrev: Button
+    private lateinit var btnForward10: Button
+    private lateinit var btnRewind10: Button
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: MutableList<Song>
     private var currentIndex = 0
@@ -55,6 +57,8 @@ class MainActivity : AppCompatActivity() {
         btnPlayPause = findViewById(R.id.btnPlayPause)
         btnNext = findViewById(R.id.btnNext)
         btnPrev = findViewById(R.id.btnPrev)
+        btnForward10 = findViewById(R.id.btnForward10)
+        btnRewind10 = findViewById(R.id.btnRewind10)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), 1)
@@ -110,6 +114,20 @@ class MainActivity : AppCompatActivity() {
                     it.start()
                     btnPlayPause.text = "⏸️"
                 }
+            }
+        }
+
+        btnForward10.setOnClickListener {
+            mediaPlayer?.let {
+                val newPos = it.currentPosition + 10000
+                it.seekTo(if (newPos > it.duration) it.duration else newPos)
+            }
+        }
+
+        btnRewind10.setOnClickListener {
+            mediaPlayer?.let {
+                val newPos = it.currentPosition - 10000
+                it.seekTo(if (newPos < 0) 0 else newPos)
             }
         }
 
