@@ -22,12 +22,12 @@
         android:maxLines="1"
         android:ellipsize="end"/>
 
-    <SeekBar
+    <ProgressBar
         android:id="@+id/notifSeekBar"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:thumb="@drawable/seek_thumb"
-        android:splitTrack="false"/>
+        android:indeterminate="false"/>
 
     <LinearLayout
         android:orientation="horizontal"

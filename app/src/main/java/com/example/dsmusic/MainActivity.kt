@@ -427,8 +427,6 @@ class MainActivity : AppCompatActivity() {
         notificationViews.setOnClickPendingIntent(R.id.btnNotifNext, nextPending)
         notificationViews.setInt(R.id.notifSeekBar, "setMax", seekBar.max)
         notificationViews.setInt(R.id.notifSeekBar, "setProgress", current)
-        // set seek handling on the notification's progress bar if supported
-        notificationViews.setSeekBarListener(R.id.notifSeekBar, seekPending, EXTRA_PROGRESS)
 
         notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(playIcon)
@@ -453,20 +451,3 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-private fun RemoteViews.setSeekBarListener(viewId: Int, pending: PendingIntent, extra: String) {
-    if (Build.VERSION.SDK_INT >= 26) {
-        try {
-            val method = RemoteViews::class.java.getMethod(
-                "setOnSeekBarChangeListener",
-                Int::class.javaPrimitiveType,
-                PendingIntent::class.java,
-                String::class.java
-            )
-            method.invoke(this, viewId, pending, extra)
-        } catch (_: Exception) {
-            setOnClickPendingIntent(viewId, pending)
-        }
-    } else {
-        setOnClickPendingIntent(viewId, pending)
-    }
-}
