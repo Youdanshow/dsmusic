@@ -11,7 +11,9 @@ import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,9 +36,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnForward10: Button
     private lateinit var btnRewind10: Button
     private lateinit var btnRefresh: Button
+    private lateinit var btnSearch: Button
     private lateinit var songAdapter: SongAdapter
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: MutableList<Song>
+    private lateinit var allSongs: MutableList<Song>
     private var currentIndex = 0
     private var isShuffling = false
     private var repeatMode = 0 // 0 = none, 1 = song, 2 = playlist
@@ -55,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         btnForward10 = findViewById(R.id.btnForward10)
         btnRewind10 = findViewById(R.id.btnRewind10)
         btnRefresh = findViewById(R.id.btnRefresh)
+        btnSearch = findViewById(R.id.btnSearch)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), 1)
@@ -68,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             MusicScanner.getAllAudioFiles(this).toMutableList()
         }
+        allSongs = songs.toMutableList()
         recyclerView.layoutManager = LinearLayoutManager(this)
         songAdapter = SongAdapter(songs) { song ->
             currentIndex = songs.indexOf(song)
@@ -91,6 +97,29 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnPlaylists).setOnClickListener {
             val intent = Intent(this, PlaylistActivity::class.java)
             startActivity(intent)
+        }
+
+        btnSearch.setOnClickListener {
+            val input = EditText(this)
+            AlertDialog.Builder(this)
+                .setTitle("Rechercher une musique")
+                .setView(input)
+                .setPositiveButton("Rechercher") { _, _ ->
+                    val query = input.text.toString().trim()
+                    val filtered = if (query.isEmpty()) {
+                        allSongs
+                    } else {
+                        allSongs.filter {
+                            it.title.contains(query, ignoreCase = true) ||
+                                    it.artist.contains(query, ignoreCase = true)
+                        }
+                    }
+                    songs.clear()
+                    songs.addAll(filtered)
+                    songAdapter.notifyDataSetChanged()
+                }
+                .setNegativeButton("Annuler", null)
+                .show()
         }
 
         btnRefresh.setOnClickListener {

@@ -14,6 +14,8 @@
 - **Playlists personnalisées**
   - Création et suppression de playlists
   - Ajout ou retrait de musiques aux playlists
+- **Recherche de musiques**
+  - Bouton de recherche dans le menu principal pour filtrer la liste
 - **Interface utilisateur**
   - Design simple, fluide et responsive
   - Thème sombre ou clair
