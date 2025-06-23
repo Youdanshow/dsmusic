@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     private val NOTIFICATION_ID = 1
     private val ACTION_TOGGLE_PLAY = "com.example.dsmusic.TOGGLE_PLAY"
     private val ACTION_NEXT = "com.example.dsmusic.NEXT"
+    private val ACTION_PREVIOUS = "com.example.dsmusic.PREVIOUS"
 
     private val toggleReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -83,6 +84,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val previousReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            previousSong()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -97,6 +104,12 @@ class MainActivity : AppCompatActivity() {
             this,
             nextReceiver,
             IntentFilter(ACTION_NEXT),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        ContextCompat.registerReceiver(
+            this,
+            previousReceiver,
+            IntentFilter(ACTION_PREVIOUS),
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
@@ -352,6 +365,9 @@ class MainActivity : AppCompatActivity() {
         val nextIntent = Intent(ACTION_NEXT).apply {
             `package` = packageName
         }
+        val previousIntent = Intent(ACTION_PREVIOUS).apply {
+            `package` = packageName
+        }
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         } else {
@@ -359,6 +375,7 @@ class MainActivity : AppCompatActivity() {
         }
         val togglePending = PendingIntent.getBroadcast(this, 0, toggleIntent, flags)
         val nextPending = PendingIntent.getBroadcast(this, 1, nextIntent, flags)
+        val previousPending = PendingIntent.getBroadcast(this, 2, previousIntent, flags)
         val playIcon = if (mediaPlayer?.isPlaying == true) {
             android.R.drawable.ic_media_pause
         } else {
@@ -370,6 +387,7 @@ class MainActivity : AppCompatActivity() {
             .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .addAction(android.R.drawable.ic_media_previous, "Précédent", previousPending)
             .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Lire", togglePending)
             .addAction(android.R.drawable.ic_media_next, "Suivant", nextPending)
             .setProgress(seekBar.max, seekBar.progress, false)
@@ -383,5 +401,6 @@ class MainActivity : AppCompatActivity() {
         notificationManager.cancel(NOTIFICATION_ID)
         unregisterReceiver(toggleReceiver)
         unregisterReceiver(nextReceiver)
+        unregisterReceiver(previousReceiver)
     }
 }

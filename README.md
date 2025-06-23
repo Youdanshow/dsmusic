@@ -10,6 +10,7 @@
   - Mode aléatoire (Shuffle)
   - Mode répétition (titre ou playlist)
   - Barre de progression
+  - Notification avec contrôle (précédent, pause/lecture, suivant)
   - Affichage des métadonnées (titre, artiste, pochette)
 - **Playlists personnalisées**
   - Création et suppression de playlists
