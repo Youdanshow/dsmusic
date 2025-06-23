@@ -9,7 +9,7 @@
   - Suivant / Précédent
   - Mode aléatoire (Shuffle)
   - Mode répétition (titre ou playlist)
-  - Barre de progression
+  - Barre de progression avec curseur déplaçable
   - Notification avec contrôle (précédent, pause/lecture, suivant)
   - Affichage de la durée et de la progression dans la notification
   - Affichage des métadonnées (titre, artiste, pochette)

@@ -94,7 +94,9 @@
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/seek_thumb"
+        android:splitTrack="false" />
 
     <TextView
         android:id="@+id/txtTotalTime"
