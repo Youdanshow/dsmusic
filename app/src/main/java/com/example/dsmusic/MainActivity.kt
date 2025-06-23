@@ -3,6 +3,10 @@ package com.example.dsmusic
 import android.Manifest
 import android.content.Intent
 import android.media.MediaPlayer
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import androidx.core.app.NotificationCompat
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -45,6 +49,11 @@ class MainActivity : AppCompatActivity() {
     private var isShuffling = false
     private var repeatMode = 0 // 0 = none, 1 = song, 2 = playlist
 
+    private lateinit var notificationManager: NotificationManager
+    private lateinit var notificationBuilder: NotificationCompat.Builder
+    private val CHANNEL_ID = "music_playback"
+    private val NOTIFICATION_ID = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -61,10 +70,31 @@ class MainActivity : AppCompatActivity() {
         btnRefresh = findViewById(R.id.btnRefresh)
         btnSearch = findViewById(R.id.btnSearch)
 
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Music Playback",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), 1)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ),
+                1
+            )
         } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                1
+            )
         }
 
         val playlistJson = intent.getStringExtra("PLAYLIST")
@@ -207,6 +237,8 @@ class MainActivity : AppCompatActivity() {
             updateSeekBar()
         }
 
+        showNotification(song)
+
         btnPlayPause.text = "⏸️"
 
         Toast.makeText(this, "Lecture : ${song.title}", Toast.LENGTH_SHORT).show()
@@ -255,6 +287,10 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer?.let {
                     seekBar.progress = it.currentPosition
                     txtCurrentTime.text = formatTime(it.currentPosition)
+                    if (::notificationBuilder.isInitialized) {
+                        notificationBuilder.setProgress(seekBar.max, it.currentPosition, false)
+                        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+                    }
                     handler.postDelayed(this, 500)
                 }
             }
@@ -267,9 +303,21 @@ class MainActivity : AppCompatActivity() {
         return String.format("%02d:%02d", minutes, seconds)
     }
 
+    private fun showNotification(song: Song) {
+        notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(song.title)
+            .setContentText(song.artist)
+            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setProgress(seekBar.max, 0, false)
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 }
