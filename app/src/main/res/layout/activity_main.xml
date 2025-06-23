@@ -21,6 +21,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <Button
+        android:id="@+id/btnRefresh"
+        android:text="🔄 Rafraîchir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <!-- Playback controls -->
     <LinearLayout
         android:orientation="horizontal"

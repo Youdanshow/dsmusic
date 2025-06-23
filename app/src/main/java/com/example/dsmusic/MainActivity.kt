@@ -22,7 +22,6 @@ import com.example.dsmusic.adapter.SongAdapter
 import com.example.dsmusic.model.Playlist
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.utils.MusicScanner
-import com.example.dsmusic.utils.PlaylistManager
 import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPrev: Button
     private lateinit var btnForward10: Button
     private lateinit var btnRewind10: Button
+    private lateinit var btnRefresh: Button
+    private lateinit var songAdapter: SongAdapter
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: MutableList<Song>
     private var currentIndex = 0
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         btnPrev = findViewById(R.id.btnPrev)
         btnForward10 = findViewById(R.id.btnForward10)
         btnRewind10 = findViewById(R.id.btnRewind10)
+        btnRefresh = findViewById(R.id.btnRefresh)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_AUDIO), 1)
@@ -73,10 +75,11 @@ class MainActivity : AppCompatActivity() {
             MusicScanner.getAllAudioFiles(this).toMutableList()
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = SongAdapter(songs) { song ->
+        songAdapter = SongAdapter(songs) { song ->
             currentIndex = songs.indexOf(song)
             playSong(song)
         }
+        recyclerView.adapter = songAdapter
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -101,6 +104,14 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnPlaylists).setOnClickListener {
             val intent = Intent(this, PlaylistActivity::class.java)
             startActivity(intent)
+        }
+
+        btnRefresh.setOnClickListener {
+            val newSongs = MusicScanner.getAllAudioFiles(this)
+            songs.clear()
+            songs.addAll(newSongs)
+            songAdapter.notifyDataSetChanged()
+            Toast.makeText(this, "Liste mise à jour", Toast.LENGTH_SHORT).show()
         }
 
         btnNext.setOnClickListener { nextSong() }
