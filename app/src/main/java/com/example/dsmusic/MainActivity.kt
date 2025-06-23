@@ -2,11 +2,8 @@ package com.example.dsmusic
 
 import android.Manifest
 import android.content.Intent
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
@@ -21,12 +18,12 @@ import com.example.dsmusic.adapter.SongAdapter
 import com.example.dsmusic.model.Playlist
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.utils.MusicScanner
+import com.example.dsmusic.service.MusicService
 import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private var mediaPlayer: MediaPlayer? = null
     private lateinit var seekBar: SeekBar
     private lateinit var txtCurrentTime: TextView
     private lateinit var txtTotalTime: TextView
@@ -38,12 +35,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnRefresh: Button
     private lateinit var btnSearch: Button
     private lateinit var songAdapter: SongAdapter
-    private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: MutableList<Song>
     private lateinit var allSongs: MutableList<Song>
     private var currentIndex = 0
     private var isShuffling = false
     private var repeatMode = 0 // 0 = none, 1 = song, 2 = playlist
+    private var isPlaying = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,17 +78,7 @@ class MainActivity : AppCompatActivity() {
         }
         recyclerView.adapter = songAdapter
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    mediaPlayer?.seekTo(progress)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        // SeekBar disabled when using background service
 
 
         findViewById<Button>(R.id.btnPlaylists).setOnClickListener {
@@ -133,29 +120,19 @@ class MainActivity : AppCompatActivity() {
         btnNext.setOnClickListener { nextSong() }
         btnPrev.setOnClickListener { previousSong() }
         btnPlayPause.setOnClickListener {
-            mediaPlayer?.let {
-                if (it.isPlaying) {
-                    it.pause()
-                    btnPlayPause.text = "▶️"
-                } else {
-                    it.start()
-                    btnPlayPause.text = "⏸️"
-                }
-            }
+            val action = if (isPlaying) MusicService.ACTION_PAUSE else MusicService.ACTION_PLAY
+            val intent = Intent(this, MusicService::class.java).apply { this.action = action }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent) else startService(intent)
+            isPlaying = !isPlaying
+            btnPlayPause.text = if (isPlaying) "⏸️" else "▶️"
         }
 
         btnForward10.setOnClickListener {
-            mediaPlayer?.let {
-                val newPos = it.currentPosition + 10000
-                it.seekTo(if (newPos > it.duration) it.duration else newPos)
-            }
+            Toast.makeText(this, "Fonction indisponible", Toast.LENGTH_SHORT).show()
         }
 
         btnRewind10.setOnClickListener {
-            mediaPlayer?.let {
-                val newPos = it.currentPosition - 10000
-                it.seekTo(if (newPos < 0) 0 else newPos)
-            }
+            Toast.makeText(this, "Fonction indisponible", Toast.LENGTH_SHORT).show()
         }
 
         val btnShuffle = findViewById<Button>(R.id.btnShuffle)
@@ -189,33 +166,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun playSong(song: Song) {
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
-            prepare()
-            start()
-
-            setOnCompletionListener {
-                when (repeatMode) {
-                    1 -> playSong(songs[currentIndex])
-                    else -> nextSong()
-                }
-            }
-
-            seekBar.max = duration
-            txtTotalTime.text = formatTime(duration)
-            updateSeekBar()
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = MusicService.ACTION_START
+            putExtra(MusicService.EXTRA_SONGS, Gson().toJson(songs))
+            putExtra(MusicService.EXTRA_INDEX, currentIndex)
         }
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
         btnPlayPause.text = "⏸️"
-
         Toast.makeText(this, "Lecture : ${song.title}", Toast.LENGTH_SHORT).show()
+        isPlaying = true
     }
 
     private fun nextSong() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-
         currentIndex = if (isShuffling) {
             (songs.indices - currentIndex).random()
         } else {
@@ -227,13 +193,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        playSong(songs[currentIndex])
+        val intent = Intent(this, MusicService::class.java).apply { action = MusicService.ACTION_NEXT }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent) else startService(intent)
     }
 
     private fun previousSong() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-
         val atFirst = currentIndex == 0
         currentIndex = if (isShuffling) {
             (songs.indices - currentIndex).random()
@@ -246,19 +210,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        playSong(songs[currentIndex])
-    }
-
-    private fun updateSeekBar() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                mediaPlayer?.let {
-                    seekBar.progress = it.currentPosition
-                    txtCurrentTime.text = formatTime(it.currentPosition)
-                    handler.postDelayed(this, 500)
-                }
-            }
-        }, 0)
+        val intent = Intent(this, MusicService::class.java).apply { action = MusicService.ACTION_PREV }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent) else startService(intent)
     }
 
     private fun formatTime(ms: Int): String {
@@ -269,7 +222,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        mediaPlayer?.release()
+        val intent = Intent(this, MusicService::class.java).apply { action = MusicService.ACTION_STOP }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent) else startService(intent)
     }
 }
