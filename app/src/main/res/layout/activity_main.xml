@@ -21,12 +21,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <Button
+        android:id="@+id/btnRefresh"
+        android:text="🔄 Rafraîchir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <!-- Playback controls -->
     <LinearLayout
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnRewind10"
+            android:text="⏪10s"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btnPrev"
@@ -43,6 +55,12 @@
         <Button
             android:id="@+id/btnNext"
             android:text="⏭️"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnForward10"
+            android:text="10s⏩"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
