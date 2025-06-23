@@ -20,6 +20,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.EditText
+import android.widget.RemoteViews
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -55,11 +56,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var notificationManager: NotificationManager
     private lateinit var notificationBuilder: NotificationCompat.Builder
+    private lateinit var notificationViews: RemoteViews
     private val CHANNEL_ID = "music_playback"
     private val NOTIFICATION_ID = 1
     private val ACTION_TOGGLE_PLAY = "com.example.dsmusic.TOGGLE_PLAY"
     private val ACTION_NEXT = "com.example.dsmusic.NEXT"
     private val ACTION_PREVIOUS = "com.example.dsmusic.PREVIOUS"
+    private val ACTION_SEEK = "com.example.dsmusic.SEEK"
+    private val EXTRA_PROGRESS = "PROGRESS"
 
     private val toggleReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -90,6 +94,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val seekReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val progress = intent?.getIntExtra(EXTRA_PROGRESS, -1) ?: -1
+            if (progress >= 0) {
+                mediaPlayer?.seekTo(progress)
+                seekBar.progress = progress
+                songs.getOrNull(currentIndex)?.let { showNotification(it) }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -110,6 +125,12 @@ class MainActivity : AppCompatActivity() {
             this,
             previousReceiver,
             IntentFilter(ACTION_PREVIOUS),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        ContextCompat.registerReceiver(
+            this,
+            seekReceiver,
+            IntentFilter(ACTION_SEEK),
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
@@ -342,11 +363,16 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer?.let {
                     seekBar.progress = it.currentPosition
                     txtCurrentTime.text = formatTime(it.currentPosition)
-                    if (::notificationBuilder.isInitialized) {
+                    if (::notificationBuilder.isInitialized && ::notificationViews.isInitialized) {
                         val progressText = "${formatTime(it.currentPosition)} / ${formatTime(it.duration)}"
-                        notificationBuilder
-                            .setProgress(seekBar.max, it.currentPosition, false)
-                            .setSubText(progressText)
+                        notificationViews.setInt(R.id.notifSeekBar, "setProgress", it.currentPosition)
+                        val playIcon = if (it.isPlaying) {
+                            android.R.drawable.ic_media_pause
+                        } else {
+                            android.R.drawable.ic_media_play
+                        }
+                        notificationViews.setImageViewResource(R.id.btnNotifPlayPause, playIcon)
+                        notificationBuilder.setSubText(progressText)
                         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
                     }
                     handler.postDelayed(this, 500)
@@ -371,6 +397,9 @@ class MainActivity : AppCompatActivity() {
         val previousIntent = Intent(ACTION_PREVIOUS).apply {
             `package` = packageName
         }
+        val seekIntent = Intent(ACTION_SEEK).apply {
+            `package` = packageName
+        }
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         } else {
@@ -379,6 +408,7 @@ class MainActivity : AppCompatActivity() {
         val togglePending = PendingIntent.getBroadcast(this, 0, toggleIntent, flags)
         val nextPending = PendingIntent.getBroadcast(this, 1, nextIntent, flags)
         val previousPending = PendingIntent.getBroadcast(this, 2, previousIntent, flags)
+        val seekPending = PendingIntent.getBroadcast(this, 3, seekIntent, flags)
         val playIcon = if (mediaPlayer?.isPlaying == true) {
             android.R.drawable.ic_media_pause
         } else {
@@ -388,17 +418,27 @@ class MainActivity : AppCompatActivity() {
         val duration = mediaPlayer?.duration ?: seekBar.max
         val progressText = "${formatTime(current)} / ${formatTime(duration)}"
 
+        notificationViews = RemoteViews(packageName, R.layout.notification_playback)
+        notificationViews.setTextViewText(R.id.notifTitle, song.title)
+        notificationViews.setTextViewText(R.id.notifArtist, song.artist)
+        notificationViews.setImageViewResource(R.id.btnNotifPlayPause, playIcon)
+        notificationViews.setOnClickPendingIntent(R.id.btnNotifPrev, previousPending)
+        notificationViews.setOnClickPendingIntent(R.id.btnNotifPlayPause, togglePending)
+        notificationViews.setOnClickPendingIntent(R.id.btnNotifNext, nextPending)
+        notificationViews.setInt(R.id.notifSeekBar, "setMax", seekBar.max)
+        notificationViews.setInt(R.id.notifSeekBar, "setProgress", current)
+        if (Build.VERSION.SDK_INT >= 26) {
+            notificationViews.setOnSeekBarChangeListener(R.id.notifSeekBar, seekPending, EXTRA_PROGRESS)
+        }
+
         notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(song.title)
-            .setContentText(song.artist)
-            .setSubText(progressText)
             .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(android.R.drawable.ic_media_previous, "Précédent", previousPending)
-            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Lire", togglePending)
-            .addAction(android.R.drawable.ic_media_next, "Suivant", nextPending)
-            .setProgress(seekBar.max, seekBar.progress, false)
+            .setCustomContentView(notificationViews)
+            .setCustomBigContentView(notificationViews)
+            .setSubText(progressText)
+
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
@@ -410,5 +450,6 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(toggleReceiver)
         unregisterReceiver(nextReceiver)
         unregisterReceiver(previousReceiver)
+        unregisterReceiver(seekReceiver)
     }
 }

@@ -12,6 +12,7 @@
   - Barre de progression avec curseur déplaçable
   - Notification avec contrôle (précédent, pause/lecture, suivant)
   - Affichage de la durée et de la progression dans la notification
+  - Barre de progression interactive dans la notification
   - Affichage des métadonnées (titre, artiste, pochette)
 - **Playlists personnalisées**
   - Création et suppression de playlists
