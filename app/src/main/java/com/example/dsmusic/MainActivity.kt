@@ -343,7 +343,10 @@ class MainActivity : AppCompatActivity() {
                     seekBar.progress = it.currentPosition
                     txtCurrentTime.text = formatTime(it.currentPosition)
                     if (::notificationBuilder.isInitialized) {
-                        notificationBuilder.setProgress(seekBar.max, it.currentPosition, false)
+                        val progressText = "${formatTime(it.currentPosition)} / ${formatTime(it.duration)}"
+                        notificationBuilder
+                            .setProgress(seekBar.max, it.currentPosition, false)
+                            .setSubText(progressText)
                         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
                     }
                     handler.postDelayed(this, 500)
@@ -381,9 +384,14 @@ class MainActivity : AppCompatActivity() {
         } else {
             android.R.drawable.ic_media_play
         }
+        val current = mediaPlayer?.currentPosition ?: 0
+        val duration = mediaPlayer?.duration ?: seekBar.max
+        val progressText = "${formatTime(current)} / ${formatTime(duration)}"
+
         notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(song.title)
             .setContentText(song.artist)
+            .setSubText(progressText)
             .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

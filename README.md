@@ -11,6 +11,7 @@
   - Mode répétition (titre ou playlist)
   - Barre de progression
   - Notification avec contrôle (précédent, pause/lecture, suivant)
+  - Affichage de la durée et de la progression dans la notification
   - Affichage des métadonnées (titre, artiste, pochette)
 - **Playlists personnalisées**
   - Création et suppression de playlists
