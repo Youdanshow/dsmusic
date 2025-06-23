@@ -89,3 +89,10 @@
    & "<path-to-adb>"/adb devices
    ./gradlew installDebug
    ```
+6. Tester une branche du projet
+    ```bash
+    git fetch origin <branch-name>
+    git switch <branch-name>
+   ./gradlew clean build
+   ./gradlew installDebug
+   ```
