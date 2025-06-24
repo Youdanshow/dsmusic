@@ -20,6 +20,8 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.EditText
+import java.text.Normalizer
+import java.util.Locale
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -191,12 +193,14 @@ class MainActivity : AppCompatActivity() {
                 .setView(input)
                 .setPositiveButton("Rechercher") { _, _ ->
                     val query = input.text.toString().trim()
-                    val filtered = if (query.isEmpty()) {
+                    val normalizedQuery = normalize(query)
+                    val filtered = if (normalizedQuery.isEmpty()) {
                         allSongs
                     } else {
                         allSongs.filter {
-                            it.title.contains(query, ignoreCase = true) ||
-                                    it.artist.contains(query, ignoreCase = true)
+                            val title = normalize(it.title)
+                            val artist = normalize(it.artist)
+                            title.contains(normalizedQuery) || artist.contains(normalizedQuery)
                         }
                     }
                     songs.clear()
@@ -361,6 +365,12 @@ class MainActivity : AppCompatActivity() {
         return String.format("%02d:%02d", minutes, seconds)
     }
 
+    private fun normalize(text: String): String {
+        val temp = Normalizer.normalize(text.lowercase(Locale.getDefault()), Normalizer.Form.NFD)
+        val noDiacritics = temp.replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+        return noDiacritics.replace("[^a-z0-9]".toRegex(), "")
+    }
+
     private fun showNotification(song: Song) {
         val toggleIntent = Intent(ACTION_TOGGLE_PLAY).apply {
             `package` = packageName
@@ -395,9 +405,9 @@ class MainActivity : AppCompatActivity() {
             .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(android.R.drawable.ic_media_previous, "Précédent", previousPending)
-            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Lire", togglePending)
-            .addAction(android.R.drawable.ic_media_next, "Suivant", nextPending)
+            .addAction(android.R.drawable.ic_media_previous, "⏪", previousPending)
+            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "⏸️" else "▶️", togglePending)
+            .addAction(android.R.drawable.ic_media_next, "⏩", nextPending)
             .setProgress(seekBar.max, seekBar.progress, false)
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
