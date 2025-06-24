@@ -2,14 +2,9 @@ package com.example.dsmusic
 
 import android.Manifest
 import android.content.Intent
-import android.media.MediaPlayer
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.IntentFilter
-import androidx.core.app.NotificationCompat
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
 import androidx.core.content.ContextCompat
 import android.os.Build
 import android.os.Bundle
@@ -30,13 +25,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.dsmusic.adapter.SongAdapter
 import com.example.dsmusic.model.Playlist
 import com.example.dsmusic.model.Song
+import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.utils.MusicScanner
 import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private var mediaPlayer: MediaPlayer? = null
+    private var musicService: MusicService? = null
     private lateinit var seekBar: SeekBar
     private lateinit var txtCurrentTime: TextView
     private lateinit var txtTotalTime: TextView
@@ -55,65 +51,28 @@ class MainActivity : AppCompatActivity() {
     private var isShuffling = false
     private var repeatMode = 0 // 0 = none, 1 = song, 2 = playlist
 
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var notificationBuilder: NotificationCompat.Builder
-    private val CHANNEL_ID = "music_playback"
-    private val NOTIFICATION_ID = 1
-    private val ACTION_TOGGLE_PLAY = "com.example.dsmusic.TOGGLE_PLAY"
-    private val ACTION_NEXT = "com.example.dsmusic.NEXT"
-    private val ACTION_PREVIOUS = "com.example.dsmusic.PREVIOUS"
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            musicService = (service as MusicService.LocalBinder).getService()
+            updateSeekBar()
+        }
 
-    private val toggleReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            mediaPlayer?.let {
-                if (it.isPlaying) {
-                    it.pause()
-                    btnPlayPause.text = "\u25B6\uFE0F"
-                } else {
-                    it.start()
-                    btnPlayPause.text = "\u23F8\uFE0F"
-                }
-                songs.getOrNull(currentIndex)?.let { song ->
-                    showNotification(song)
-                }
-            }
+        override fun onServiceDisconnected(name: ComponentName?) {
+            musicService = null
         }
     }
 
-    private val nextReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            nextSong()
-        }
-    }
+    private val ACTION_TOGGLE_PLAY = MusicService.ACTION_TOGGLE_PLAY
+    private val ACTION_NEXT = MusicService.ACTION_NEXT
+    private val ACTION_PREVIOUS = MusicService.ACTION_PREVIOUS
 
-    private val previousReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            previousSong()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        ContextCompat.registerReceiver(
-            this,
-            toggleReceiver,
-            IntentFilter(ACTION_TOGGLE_PLAY),
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
-        ContextCompat.registerReceiver(
-            this,
-            nextReceiver,
-            IntentFilter(ACTION_NEXT),
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
-        ContextCompat.registerReceiver(
-            this,
-            previousReceiver,
-            IntentFilter(ACTION_PREVIOUS),
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
+        bindService(Intent(this, MusicService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+
 
         recyclerView = findViewById(R.id.recyclerSongs)
         seekBar = findViewById(R.id.seekBar)
@@ -127,15 +86,7 @@ class MainActivity : AppCompatActivity() {
         btnRefresh = findViewById(R.id.btnRefresh)
         btnSearch = findViewById(R.id.btnSearch)
 
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Music Playback",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
@@ -171,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    mediaPlayer?.seekTo(progress)
+                    musicService?.seekTo(progress)
                 }
             }
 
@@ -222,27 +173,23 @@ class MainActivity : AppCompatActivity() {
         btnNext.setOnClickListener { nextSong() }
         btnPrev.setOnClickListener { previousSong() }
         btnPlayPause.setOnClickListener {
-            mediaPlayer?.let {
-                if (it.isPlaying) {
-                    it.pause()
-                    btnPlayPause.text = "▶️"
-                } else {
-                    it.start()
-                    btnPlayPause.text = "⏸️"
-                }
+            val intent = Intent(this, MusicService::class.java).apply {
+                action = MusicService.ACTION_TOGGLE_PLAY
             }
+            ContextCompat.startForegroundService(this, intent)
+            btnPlayPause.text = if (musicService?.isPlaying() == true) "▶️" else "⏸️"
         }
 
         btnForward10.setOnClickListener {
-            mediaPlayer?.let {
-                val newPos = it.currentPosition + 10000
-                it.seekTo(if (newPos > it.duration) it.duration else newPos)
+            musicService?.let {
+                val newPos = it.getCurrentPosition() + 10000
+                it.seekTo(if (newPos > it.getDuration()) it.getDuration() else newPos)
             }
         }
 
         btnRewind10.setOnClickListener {
-            mediaPlayer?.let {
-                val newPos = it.currentPosition - 10000
+            musicService?.let {
+                val newPos = it.getCurrentPosition() - 10000
                 it.seekTo(if (newPos < 0) 0 else newPos)
             }
         }
@@ -252,6 +199,7 @@ class MainActivity : AppCompatActivity() {
 
         btnShuffle.setOnClickListener {
             isShuffling = !isShuffling
+            musicService?.toggleShuffle()
             btnShuffle.text = if (isShuffling) "✅🔀" else "🔀"
             Toast.makeText(
                 this,
@@ -262,6 +210,7 @@ class MainActivity : AppCompatActivity() {
 
         btnRepeat.setOnClickListener {
             repeatMode = (repeatMode + 1) % 3
+            musicService?.cycleRepeatMode()
             val modeText = when (repeatMode) {
                 1 -> "🔂"
                 2 -> "🔁"
@@ -278,81 +227,54 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun playSong(song: Song) {
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
-            prepare()
-            start()
-
-            setOnCompletionListener {
-                when (repeatMode) {
-                    1 -> playSong(songs[currentIndex])
-                    else -> nextSong()
-                }
-            }
-
-            seekBar.max = duration
-            txtTotalTime.text = formatTime(duration)
-            updateSeekBar()
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = MusicService.ACTION_START
+            putExtra("SONGS", Gson().toJson(songs))
+            putExtra("INDEX", currentIndex)
         }
-
-        showNotification(song)
-
+        ContextCompat.startForegroundService(this, intent)
+        handler.post { updateSeekBar() }
         btnPlayPause.text = "⏸️"
-
         Toast.makeText(this, "Lecture : ${song.title}", Toast.LENGTH_SHORT).show()
     }
 
     private fun nextSong() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-
         currentIndex = if (isShuffling) {
             (songs.indices - currentIndex).random()
         } else {
             (currentIndex + 1) % songs.size
         }
-
-        if (repeatMode == 0 && currentIndex == 0 && !isShuffling) {
-            Toast.makeText(this, "Fin de la playlist", Toast.LENGTH_SHORT).show()
-            return
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = MusicService.ACTION_NEXT
         }
-
-        playSong(songs[currentIndex])
+        ContextCompat.startForegroundService(this, intent)
     }
 
     private fun previousSong() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-
         val atFirst = currentIndex == 0
         currentIndex = if (isShuffling) {
             (songs.indices - currentIndex).random()
         } else {
             if (currentIndex - 1 < 0) songs.size - 1 else currentIndex - 1
         }
-
+        val intent = Intent(this, MusicService::class.java).apply {
+            action = MusicService.ACTION_PREVIOUS
+        }
+        ContextCompat.startForegroundService(this, intent)
         if (repeatMode == 0 && atFirst && !isShuffling) {
             Toast.makeText(this, "Début de la playlist", Toast.LENGTH_SHORT).show()
-            return
         }
-
-        playSong(songs[currentIndex])
     }
 
     private fun updateSeekBar() {
         handler.postDelayed(object : Runnable {
             override fun run() {
-                mediaPlayer?.let {
-                    seekBar.progress = it.currentPosition
-                    txtCurrentTime.text = formatTime(it.currentPosition)
-                    if (::notificationBuilder.isInitialized) {
-                        val progressText = "${formatTime(it.currentPosition)} / ${formatTime(it.duration)}"
-                        notificationBuilder
-                            .setProgress(seekBar.max, it.currentPosition, false)
-                            .setSubText(progressText)
-                        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-                    }
+                musicService?.let {
+                    seekBar.max = it.getDuration()
+                    val pos = it.getCurrentPosition()
+                    seekBar.progress = pos
+                    txtCurrentTime.text = formatTime(pos)
+                    txtTotalTime.text = formatTime(it.getDuration())
                     handler.postDelayed(this, 500)
                 }
             }
@@ -371,54 +293,10 @@ class MainActivity : AppCompatActivity() {
         return noDiacritics.replace("[^a-z0-9]".toRegex(), "")
     }
 
-    private fun showNotification(song: Song) {
-        val toggleIntent = Intent(ACTION_TOGGLE_PLAY).apply {
-            `package` = packageName
-        }
-        val nextIntent = Intent(ACTION_NEXT).apply {
-            `package` = packageName
-        }
-        val previousIntent = Intent(ACTION_PREVIOUS).apply {
-            `package` = packageName
-        }
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
-        val togglePending = PendingIntent.getBroadcast(this, 0, toggleIntent, flags)
-        val nextPending = PendingIntent.getBroadcast(this, 1, nextIntent, flags)
-        val previousPending = PendingIntent.getBroadcast(this, 2, previousIntent, flags)
-        val playIcon = if (mediaPlayer?.isPlaying == true) {
-            android.R.drawable.ic_media_pause
-        } else {
-            android.R.drawable.ic_media_play
-        }
-        val current = mediaPlayer?.currentPosition ?: 0
-        val duration = mediaPlayer?.duration ?: seekBar.max
-        val progressText = "${formatTime(current)} / ${formatTime(duration)}"
-
-        notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(song.title)
-            .setContentText(song.artist)
-            .setSubText(progressText)
-            .setSmallIcon(playIcon)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .addAction(android.R.drawable.ic_media_previous, "⏪", previousPending)
-            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "⏸️" else "▶️", togglePending)
-            .addAction(android.R.drawable.ic_media_next, "⏩", nextPending)
-            .setProgress(seekBar.max, seekBar.progress, false)
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-    }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
-        mediaPlayer?.release()
-        notificationManager.cancel(NOTIFICATION_ID)
-        unregisterReceiver(toggleReceiver)
-        unregisterReceiver(nextReceiver)
-        unregisterReceiver(previousReceiver)
+        unbindService(serviceConnection)
     }
 }
