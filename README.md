@@ -18,6 +18,7 @@
   - Ajout ou retrait de musiques aux playlists
 - **Recherche de musiques**
   - Bouton de recherche dans le menu principal pour filtrer la liste
+  - Recherche sans accent et insensible à la ponctuation
 - **Interface utilisateur**
   - Design simple, fluide et responsive
   - Thème sombre ou clair

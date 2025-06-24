@@ -405,9 +405,9 @@ class MainActivity : AppCompatActivity() {
             .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(android.R.drawable.ic_media_previous, "Précédent", previousPending)
-            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Lire", togglePending)
-            .addAction(android.R.drawable.ic_media_next, "Suivant", nextPending)
+            .addAction(android.R.drawable.ic_media_previous, "⏪", previousPending)
+            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "⏸️" else "▶️", togglePending)
+            .addAction(android.R.drawable.ic_media_next, "⏩", nextPending)
             .setProgress(seekBar.max, seekBar.progress, false)
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
