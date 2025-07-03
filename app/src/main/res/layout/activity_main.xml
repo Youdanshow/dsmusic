@@ -3,6 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <ImageView
+        android:id="@+id/imgAlbumArt"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Album Art" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerSongs"
         android:layout_width="match_parent"
@@ -25,6 +33,12 @@
     <Button
         android:id="@+id/btnRefresh"
         android:text="🔄 Rafraîchir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnSettings"
+        android:text="⚙️ Réglages"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

@@ -16,6 +16,10 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.EditText
+import android.widget.ImageView
+import android.media.MediaMetadataRetriever
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import java.text.Normalizer
 import java.util.Locale
 import androidx.appcompat.app.AppCompatActivity
@@ -43,7 +47,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnForward10: Button
     private lateinit var btnRewind10: Button
     private lateinit var btnRefresh: Button
+    private lateinit var btnSettings: Button
     private lateinit var btnSearch: Button
+    private lateinit var imgAlbumArt: ImageView
     private lateinit var songAdapter: SongAdapter
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var songs: MutableList<Song>
@@ -70,6 +76,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        AppCompatDelegate.setDefaultNightMode(
+            if (prefs.getBoolean("dark_theme", false))
+                AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
         setContentView(R.layout.activity_main)
 
         bindService(Intent(this, MusicService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
@@ -85,7 +97,9 @@ class MainActivity : AppCompatActivity() {
         btnForward10 = findViewById(R.id.btnForward10)
         btnRewind10 = findViewById(R.id.btnRewind10)
         btnRefresh = findViewById(R.id.btnRefresh)
+        btnSettings = findViewById(R.id.btnSettings)
         btnSearch = findViewById(R.id.btnSearch)
+        imgAlbumArt = findViewById(R.id.imgAlbumArt)
 
 
 
@@ -171,6 +185,10 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Liste mise à jour", Toast.LENGTH_SHORT).show()
         }
 
+        btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
         btnNext.setOnClickListener { nextSong() }
         btnPrev.setOnClickListener { previousSong() }
         btnPlayPause.setOnClickListener {
@@ -235,6 +253,7 @@ class MainActivity : AppCompatActivity() {
         }
         ContextCompat.startForegroundService(this, intent)
         handler.post { updateSeekBar() }
+        imgAlbumArt.setImageBitmap(getAlbumArt(song.path))
         btnPlayPause.text = "⏸️"
         Toast.makeText(this, "Lecture : ${song.title}", Toast.LENGTH_SHORT).show()
     }
@@ -287,6 +306,14 @@ class MainActivity : AppCompatActivity() {
         val seconds = (ms / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
+
+    private fun getAlbumArt(path: String) = try {
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(path)
+        val data = mmr.embeddedPicture
+        mmr.release()
+        if (data != null) android.graphics.BitmapFactory.decodeByteArray(data, 0, data.size) else null
+    } catch (e: Exception) { null }
 
     private fun normalize(text: String): String {
         val temp = Normalizer.normalize(text.lowercase(Locale.getDefault()), Normalizer.Form.NFD)

@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.dsmusic.PlaylistActivity" />
+        <activity android:name="com.example.dsmusic.SettingsActivity" />
         <service
             android:name="com.example.dsmusic.service.MusicService"
             android:exported="false"
