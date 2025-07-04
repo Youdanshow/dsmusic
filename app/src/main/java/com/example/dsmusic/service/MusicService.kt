@@ -1,6 +1,5 @@
 package com.example.dsmusic.service
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -61,19 +60,15 @@ class MusicService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START -> {
-                val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
+            ACTION_TOGGLE_PLAY -> togglePlay()
+            ACTION_NEXT -> skip(1)
+            ACTION_PREVIOUS -> skip(-1)
+            ACTION_STOP -> stopService()
+            else -> {
+                val songsJson = intent?.getStringExtra("SONGS") ?: return START_NOT_STICKY
                 songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
                 currentIndex = intent.getIntExtra("INDEX", 0)
-                playSong(songs[currentIndex])
-            }
-            ACTION_TOGGLE_PLAY -> togglePlay()
-            ACTION_NEXT -> nextSong()
-            ACTION_PREVIOUS -> previousSong()
-            ACTION_STOP -> {
-                stopForeground(true)
-                mediaPlayer?.release()
-                stopSelf()
+                playCurrent()
             }
         }
         return START_STICKY
@@ -110,39 +105,30 @@ class MusicService : Service() {
         }
     }
 
-    private fun nextSong() {
+    private fun skip(step: Int) {
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
+        val oldIndex = currentIndex
         currentIndex = if (isShuffling) {
             (songs.indices - currentIndex).random()
         } else {
-            (currentIndex + 1) % songs.size
+            (currentIndex + step + songs.size) % songs.size
         }
 
-        if (repeatMode == 0 && currentIndex == 0 && !isShuffling) {
-            return
-        }
+        if (repeatMode == 0 && oldIndex == currentIndex && !isShuffling) return
 
+        playCurrent()
+    }
+
+    private fun playCurrent() {
         playSong(songs[currentIndex])
     }
 
-    private fun previousSong() {
-        mediaPlayer?.stop()
+    private fun stopService() {
+        stopForeground(true)
         mediaPlayer?.release()
-
-        val atFirst = currentIndex == 0
-        currentIndex = if (isShuffling) {
-            (songs.indices - currentIndex).random()
-        } else {
-            if (currentIndex - 1 < 0) songs.size - 1 else currentIndex - 1
-        }
-
-        if (repeatMode == 0 && atFirst && !isShuffling) {
-            return
-        }
-
-        playSong(songs[currentIndex])
+        stopSelf()
     }
 
     private fun playSong(song: Song) {
@@ -155,7 +141,7 @@ class MusicService : Service() {
             setOnCompletionListener {
                 when (repeatMode) {
                     1 -> playSong(songs[currentIndex])
-                    else -> nextSong()
+                    else -> skip(1)
                 }
             }
         }
