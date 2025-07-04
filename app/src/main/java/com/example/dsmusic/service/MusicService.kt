@@ -156,11 +156,15 @@ class MusicService : Service() {
 
         val mp = MediaPlayer()
         try {
-            contentResolver.openFileDescriptor(Uri.parse(song.uri), "r")?.use { fd ->
-                mp.setDataSource(fd.fileDescriptor)
-                mp.prepare()
-                mp.start()
-            } ?: return
+            if (song.uri.startsWith("content://")) {
+                contentResolver.openFileDescriptor(Uri.parse(song.uri), "r")?.use { fd ->
+                    mp.setDataSource(fd.fileDescriptor)
+                } ?: return
+            } else {
+                mp.setDataSource(song.uri)
+            }
+            mp.prepare()
+            mp.start()
         } catch (e: Exception) {
             // Log the error but keep the service alive so the user can try another track
             e.printStackTrace()
