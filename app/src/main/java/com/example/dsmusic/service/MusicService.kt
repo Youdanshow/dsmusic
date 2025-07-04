@@ -148,19 +148,29 @@ class MusicService : Service() {
 
     private fun playSong(song: Song) {
         mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            // Use a content Uri to comply with scoped storage on Android 10+
-            setDataSource(this@MusicService, Uri.parse(song.uri))
-            prepare()
-            start()
 
-            setOnCompletionListener {
-                when (repeatMode) {
-                    1 -> playSong(songs[currentIndex])
-                    else -> nextSong()
-                }
+        val mp = MediaPlayer()
+        try {
+            contentResolver.openFileDescriptor(Uri.parse(song.uri), "r")?.use { fd ->
+                mp.setDataSource(fd.fileDescriptor)
+                mp.prepare()
+                mp.start()
+            } ?: return
+        } catch (e: Exception) {
+            // If we fail to open or prepare the media, stop the service to avoid a crash
+            e.printStackTrace()
+            stopSelf()
+            return
+        }
+
+        mp.setOnCompletionListener {
+            when (repeatMode) {
+                1 -> playSong(songs[currentIndex])
+                else -> nextSong()
             }
         }
+
+        mediaPlayer = mp
         showNotification(song)
     }
 
