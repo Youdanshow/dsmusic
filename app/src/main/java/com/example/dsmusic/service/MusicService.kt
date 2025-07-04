@@ -66,6 +66,11 @@ class MusicService : Service() {
                 val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
                 songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
                 currentIndex = intent.getIntExtra("INDEX", 0)
+
+                // Display a foreground notification immediately to avoid the
+                // system stopping the service if preparation takes too long.
+                showNotification(songs[currentIndex])
+
                 playSong(songs[currentIndex])
             }
             ACTION_TOGGLE_PLAY -> togglePlay()
@@ -157,9 +162,8 @@ class MusicService : Service() {
                 mp.start()
             } ?: return
         } catch (e: Exception) {
-            // If we fail to open or prepare the media, stop the service to avoid a crash
+            // Log the error but keep the service alive so the user can try another track
             e.printStackTrace()
-            stopSelf()
             return
         }
 
