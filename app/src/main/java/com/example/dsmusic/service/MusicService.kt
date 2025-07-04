@@ -15,6 +15,7 @@ import com.example.dsmusic.model.Song
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import android.media.MediaPlayer
+import android.net.Uri
 import com.example.dsmusic.R
 
 class MusicService : Service() {
@@ -148,7 +149,8 @@ class MusicService : Service() {
     private fun playSong(song: Song) {
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
+            // Use a content Uri to comply with scoped storage on Android 10+
+            setDataSource(this@MusicService, Uri.parse(song.uri))
             prepare()
             start()
 
