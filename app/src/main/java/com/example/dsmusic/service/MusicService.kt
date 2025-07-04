@@ -15,6 +15,7 @@ import com.example.dsmusic.model.Song
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import android.media.MediaPlayer
+import android.net.Uri
 import com.example.dsmusic.R
 
 class MusicService : Service() {
@@ -147,18 +148,25 @@ class MusicService : Service() {
 
     private fun playSong(song: Song) {
         mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
-            prepare()
-            start()
+        val mp = MediaPlayer()
+        val uri = Uri.parse(song.path)
+        val pfd = contentResolver.openFileDescriptor(uri, "r")
+        if (pfd == null) {
+            mp.release()
+            return
+        }
+        mp.setDataSource(pfd.fileDescriptor)
+        pfd.close()
+        mp.prepare()
+        mp.start()
 
-            setOnCompletionListener {
-                when (repeatMode) {
-                    1 -> playSong(songs[currentIndex])
-                    else -> nextSong()
-                }
+        mp.setOnCompletionListener {
+            when (repeatMode) {
+                1 -> playSong(songs[currentIndex])
+                else -> nextSong()
             }
         }
+        mediaPlayer = mp
         showNotification(song)
     }
 
