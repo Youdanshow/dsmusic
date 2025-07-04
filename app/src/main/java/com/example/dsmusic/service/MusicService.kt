@@ -24,8 +24,6 @@ class MusicService : Service() {
 
     private val binder = LocalBinder()
 
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var notificationBuilder: NotificationCompat.Builder
     private val CHANNEL_ID = "music_playback"
     private val NOTIFICATION_ID = 1
 
@@ -47,7 +45,7 @@ class MusicService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -170,7 +168,7 @@ class MusicService : Service() {
             android.R.drawable.ic_media_play
         }
 
-        notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(song.title)
             .setContentText(song.artist)
             .setSmallIcon(playIcon)
