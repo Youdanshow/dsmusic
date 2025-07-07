@@ -92,9 +92,10 @@ enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"
 
 @Composable
 fun SongList(songs: List<Song>) {
+    val context = LocalContext.current
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         itemsIndexed(songs) { index, song ->
-            SongItem(song) { startPlayback(LocalContext.current, songs, index) }
+            SongItem(song) { startPlayback(context, songs, index) }
         }
     }
 }
@@ -103,6 +104,7 @@ fun SongList(songs: List<Song>) {
 fun SearchScreen(allSongs: List<Song>) {
     var query by remember { mutableStateOf("") }
     val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) }
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize()) {
         TextField(
             value = query,
@@ -112,7 +114,7 @@ fun SearchScreen(allSongs: List<Song>) {
         )
         LazyColumn {
             itemsIndexed(filtered) { index, song ->
-                SongItem(song) { startPlayback(LocalContext.current, filtered, index) }
+                SongItem(song) { startPlayback(context, filtered, index) }
             }
         }
     }
