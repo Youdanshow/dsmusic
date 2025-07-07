@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -55,7 +56,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MusicApp() {
-    val songs by remember { mutableStateOf(MusicScanner.getAllAudioFiles(LocalContext.current)) }
+    val context = LocalContext.current
+    val songs by remember(context) { mutableStateOf(MusicScanner.getAllAudioFiles(context)) }
     var currentScreen by remember { mutableStateOf(BottomScreen.Home) }
 
     Scaffold(
@@ -122,8 +124,8 @@ fun SongItem(song: Song, onClick: () -> Unit) {
         headlineContent = { Text(song.title) },
         supportingContent = { Text(song.artist) },
         modifier = Modifier
-            .fillMaxSize(),
-        onClick = onClick
+            .fillMaxSize()
+            .clickable { onClick() }
     )
     Divider()
 }
