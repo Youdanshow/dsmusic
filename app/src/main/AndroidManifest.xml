@@ -20,6 +20,7 @@
         <activity android:name="com.example.dsmusic.PlaylistActivity" />
         <service
             android:name="com.example.dsmusic.service.MusicService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
     </application>
 </manifest>

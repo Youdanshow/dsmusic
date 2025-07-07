@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -79,11 +81,13 @@ fun MusicApp() {
                 }
             }
         }
-    ) { padding ->
-        when (currentScreen) {
-            BottomScreen.Home -> SongList(songs)
-            BottomScreen.Search -> SearchScreen(songs)
-            BottomScreen.Library -> SongList(songs)
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (currentScreen) {
+                BottomScreen.Home -> SongList(songs)
+                BottomScreen.Search -> SearchScreen(songs)
+                BottomScreen.Library -> SongList(songs)
+            }
         }
     }
 }
@@ -129,7 +133,7 @@ fun SongItem(song: Song, onClick: () -> Unit) {
             .fillMaxSize()
             .clickable { onClick() }
     )
-    Divider()
+    HorizontalDivider()
 }
 
 fun startPlayback(context: android.content.Context, songs: List<Song>, index: Int) {
