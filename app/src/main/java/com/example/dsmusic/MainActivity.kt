@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -242,8 +244,10 @@ fun SearchScreen(
     currentSong: Song?
 ) {
     var query by remember { mutableStateOf("") }
+    var selectedAlbum by remember { mutableStateOf<String?>(null) }
     val focusManager = LocalFocusManager.current
-    val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) }
+    val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) || it.album.contains(query, true) }
+    val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
     Column(modifier = Modifier.fillMaxSize()) {
         TextField(
             value = query,
@@ -257,15 +261,51 @@ fun SearchScreen(
             keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
         )
         LazyColumn(modifier = Modifier.weight(1f)) {
-            itemsIndexed(filtered) { index, song ->
-                SongItem(
-                    song = song,
-                    onClick = { onSongClick(song, index, filtered) },
-                    isCurrent = song.uri == currentSong?.uri
-                )
+            if (selectedAlbum == null) {
+                if (albums.isNotEmpty()) {
+                    item { Text("Albums", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.titleMedium) }
+                    items(albums) { album ->
+                        AlbumItem(album) { selectedAlbum = album }
+                    }
+                }
+                itemsIndexed(filtered) { index, song ->
+                    SongItem(
+                        song = song,
+                        onClick = { onSongClick(song, index, filtered) },
+                        isCurrent = song.uri == currentSong?.uri
+                    )
+                }
+            } else {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        IconButton(onClick = { selectedAlbum = null }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        }
+                        Text(text = selectedAlbum ?: "")
+                    }
+                }
+                val albumSongs = allSongs.filter { it.album == selectedAlbum }
+                itemsIndexed(albumSongs) { index, song ->
+                    SongItem(
+                        song = song,
+                        onClick = { onSongClick(song, index, albumSongs) },
+                        isCurrent = song.uri == currentSong?.uri
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+fun AlbumItem(album: String, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(album) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    )
+    HorizontalDivider()
 }
 
 @Composable
