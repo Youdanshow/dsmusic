@@ -36,6 +36,7 @@ import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
 import com.example.dsmusic.utils.MusicScanner
 import com.google.gson.Gson
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
