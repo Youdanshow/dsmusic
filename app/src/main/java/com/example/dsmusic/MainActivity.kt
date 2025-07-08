@@ -2,6 +2,10 @@ package com.example.dsmusic
 
 import android.Manifest
 import android.content.Intent
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import kotlinx.coroutines.delay
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -73,6 +77,27 @@ fun MusicApp() {
     var currentScreen by remember { mutableStateOf(BottomScreen.Home) }
     var currentSong by remember { mutableStateOf<Song?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
+    var musicService by remember { mutableStateOf<MusicService?>(null) }
+    val connection = remember {
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+                musicService = (binder as MusicService.LocalBinder).getService()
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                musicService = null
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        context.bindService(
+            Intent(context, MusicService::class.java),
+            connection,
+            android.content.Context.BIND_AUTO_CREATE
+        )
+        onDispose { context.unbindService(connection) }
+    }
 
     Scaffold(
         bottomBar = {
@@ -117,7 +142,7 @@ fun MusicApp() {
                 }
             }
             currentSong?.let { song ->
-                MiniPlayer(song, isPlaying) {
+                MiniPlayer(song, isPlaying, musicService) {
                     togglePlayback(context)
                     isPlaying = !isPlaying
                 }
@@ -207,23 +232,40 @@ fun togglePlayback(context: android.content.Context) {
 }
 
 @Composable
-fun MiniPlayer(song: Song, isPlaying: Boolean, onToggle: () -> Unit) {
+fun MiniPlayer(song: Song, isPlaying: Boolean, service: MusicService?, onToggle: () -> Unit) {
+    var progress by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(service, isPlaying) {
+        while (true) {
+            if (service != null && service.isPlaying()) {
+                val dur = service.getDuration()
+                if (dur > 0) {
+                    progress = service.getCurrentPosition().toFloat() / dur
+                }
+            }
+            delay(500)
+        }
+    }
+
     Surface(shadowElevation = 4.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(song.title, style = MaterialTheme.typography.bodyLarge)
-                Text(song.artist, style = MaterialTheme.typography.bodySmall)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(song.title, style = MaterialTheme.typography.bodyLarge)
+                    Text(song.artist, style = MaterialTheme.typography.bodySmall)
+                }
+                IconButton(onClick = onToggle) {
+                    val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
+                    val desc = if (isPlaying) "Pause" else "Play"
+                    Icon(icon, contentDescription = desc)
+                }
             }
-            IconButton(onClick = onToggle) {
-                val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
-                val desc = if (isPlaying) "Pause" else "Play"
-                Icon(icon, contentDescription = desc)
-            }
+            LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
         }
     }
 }
