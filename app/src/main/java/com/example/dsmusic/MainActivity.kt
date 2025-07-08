@@ -104,6 +104,20 @@ fun MusicApp() {
         onDispose { context.unbindService(connection) }
     }
 
+    LaunchedEffect(musicService) {
+        while (true) {
+            musicService?.let { service ->
+                val serviceSong = service.getCurrentSong()
+                if (serviceSong != null && serviceSong.uri != currentSong?.uri) {
+                    currentSong = serviceSong
+                    playlist = service.getSongs()
+                    currentIndex = service.getCurrentIndex()
+                }
+            }
+            delay(500)
+        }
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {

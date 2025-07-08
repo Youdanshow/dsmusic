@@ -90,6 +90,10 @@ class MusicService : Service() {
 
     fun getCurrentSong(): Song? = songs.getOrNull(currentIndex)
 
+    fun getSongs(): List<Song> = songs
+
+    fun getCurrentIndex(): Int = currentIndex
+
     fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
 
     fun toggleShuffle() {
