@@ -256,26 +256,43 @@ fun SongList(
     Column(modifier = Modifier.fillMaxSize()) {
         if (showFilter) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
-                }
-                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                    SortField.values().forEach { field ->
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
+                    }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        SortField.values().forEach { field ->
+                            DropdownMenuItem(
+                                text = { Text(field.label) },
+                                onClick = {
+                                    sortField = field
+                                    menuExpanded = false
+                                }
+                            )
+                        }
                         DropdownMenuItem(
-                            text = { Text(field.label) },
+                            text = { Text("Ordre croissant") },
                             onClick = {
-                                sortField = field
+                                ascending = true
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Ordre décroissant") },
+                            onClick = {
+                                ascending = false
+                                menuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Réinitialiser") },
+                            onClick = {
+                                sortField = SortField.TITLE
+                                ascending = true
                                 menuExpanded = false
                             }
                         )
                     }
-                    DropdownMenuItem(
-                        text = { Text(if (ascending) "Ordre décroissant" else "Ordre croissant") },
-                        onClick = {
-                            ascending = !ascending
-                            menuExpanded = false
-                        }
-                    )
                 }
             }
         }
@@ -319,26 +336,43 @@ fun SearchScreen(
     val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            IconButton(onClick = { menuExpanded = true }) {
-                Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
-            }
-            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                SortField.values().forEach { field ->
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    SortField.values().forEach { field ->
+                        DropdownMenuItem(
+                            text = { Text(field.label) },
+                            onClick = {
+                                sortField = field
+                                menuExpanded = false
+                            }
+                        )
+                    }
                     DropdownMenuItem(
-                        text = { Text(field.label) },
+                        text = { Text("Ordre croissant") },
                         onClick = {
-                            sortField = field
+                            ascending = true
+                            menuExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Ordre décroissant") },
+                        onClick = {
+                            ascending = false
+                            menuExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Réinitialiser") },
+                        onClick = {
+                            sortField = SortField.TITLE
+                            ascending = true
                             menuExpanded = false
                         }
                     )
                 }
-                DropdownMenuItem(
-                    text = { Text(if (ascending) "Ordre décroissant" else "Ordre croissant") },
-                    onClick = {
-                        ascending = !ascending
-                        menuExpanded = false
-                    }
-                )
             }
         }
         TextField(
