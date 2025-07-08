@@ -37,6 +37,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.core.content.ContextCompat
@@ -49,6 +50,9 @@ import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -238,15 +242,21 @@ fun SearchScreen(
     currentSong: Song?
 ) {
     var query by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
     val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) }
     Column(modifier = Modifier.fillMaxSize()) {
         TextField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.fillMaxSize(),
-            placeholder = { Text("Rechercher") }
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            placeholder = { Text("Rechercher") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
         )
-        LazyColumn {
+        LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(filtered) { index, song ->
                 SongItem(
                     song = song,
