@@ -512,6 +512,13 @@ fun togglePlayback(context: android.content.Context) {
     ContextCompat.startForegroundService(context, intent)
 }
 
+fun formatTime(ms: Int): String {
+    val totalSeconds = ms / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "%d:%02d".format(minutes, seconds)
+}
+
 @Composable
 fun MiniPlayer(
     song: Song,
@@ -590,6 +597,16 @@ fun MiniPlayer(
                 valueRange = 0f..duration,
                 modifier = Modifier.fillMaxWidth()
             )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(formatTime(sliderPosition.toInt()))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(formatTime(duration.toInt()))
+            }
         }
     }
 }
