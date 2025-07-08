@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -409,16 +410,14 @@ fun SearchScreen(
                     }
                 }
                 val albumSongs = allSongs.filter { it.album == selectedAlbum }
-                val sortedAlbum = remember(albumSongs, sortField, ascending) {
-                    val sorted = when (sortField) {
-                        SortField.TITLE -> albumSongs.sortedBy { it.title }
-                        SortField.ALBUM -> albumSongs.sortedBy { it.album }
-                        SortField.ARTIST -> albumSongs.sortedBy { it.artist }
-                        SortField.DURATION -> albumSongs.sortedBy { it.duration }
-                        SortField.SIZE -> albumSongs.sortedBy { it.size }
-                    }
-                    if (ascending) sorted else sorted.reversed()
-                }
+                val sortedAlbum = when (sortField) {
+                    SortField.TITLE -> albumSongs.sortedBy { it.title }
+                    SortField.ALBUM -> albumSongs.sortedBy { it.album }
+                    SortField.ARTIST -> albumSongs.sortedBy { it.artist }
+                    SortField.DURATION -> albumSongs.sortedBy { it.duration }
+                    SortField.SIZE -> albumSongs.sortedBy { it.size }
+                }.let { if (ascending) it else it.reversed() }
+
                 itemsIndexed(sortedAlbum) { index, song ->
                     SongItem(
                         song = song,
