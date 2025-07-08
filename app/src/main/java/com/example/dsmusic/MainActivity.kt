@@ -243,7 +243,8 @@ fun SearchScreen(
 ) {
     var query by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
-    val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) }
+    val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) || it.album.contains(query, true) }
+    val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
     Column(modifier = Modifier.fillMaxSize()) {
         TextField(
             value = query,
@@ -257,6 +258,12 @@ fun SearchScreen(
             keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
         )
         LazyColumn(modifier = Modifier.weight(1f)) {
+            if (albums.isNotEmpty()) {
+                item { Text("Albums", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.titleMedium) }
+                items(albums) { album ->
+                    AlbumItem(album)
+                }
+            }
             itemsIndexed(filtered) { index, song ->
                 SongItem(
                     song = song,
@@ -266,6 +273,15 @@ fun SearchScreen(
             }
         }
     }
+}
+
+@Composable
+fun AlbumItem(album: String) {
+    ListItem(
+        headlineContent = { Text(album) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    HorizontalDivider()
 }
 
 @Composable
