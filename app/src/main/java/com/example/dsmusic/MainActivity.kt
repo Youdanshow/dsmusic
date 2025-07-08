@@ -2,6 +2,10 @@ package com.example.dsmusic
 
 import android.Manifest
 import android.content.Intent
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import kotlinx.coroutines.delay
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,7 +26,10 @@ import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
@@ -72,7 +79,44 @@ fun MusicApp() {
     val songs by remember(context) { mutableStateOf(MusicScanner.getAllAudioFiles(context)) }
     var currentScreen by remember { mutableStateOf(BottomScreen.Home) }
     var currentSong by remember { mutableStateOf<Song?>(null) }
+    var playlist by remember { mutableStateOf<List<Song>>(emptyList()) }
+    var currentIndex by remember { mutableStateOf(0) }
     var isPlaying by remember { mutableStateOf(false) }
+    var musicService by remember { mutableStateOf<MusicService?>(null) }
+    val connection = remember {
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+                musicService = (binder as MusicService.LocalBinder).getService()
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                musicService = null
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        context.bindService(
+            Intent(context, MusicService::class.java),
+            connection,
+            android.content.Context.BIND_AUTO_CREATE
+        )
+        onDispose { context.unbindService(connection) }
+    }
+
+    LaunchedEffect(musicService) {
+        while (true) {
+            musicService?.let { service ->
+                val serviceSong = service.getCurrentSong()
+                if (serviceSong != null && serviceSong.uri != currentSong?.uri) {
+                    currentSong = serviceSong
+                    playlist = service.getSongs()
+                    currentIndex = service.getCurrentIndex()
+                }
+            }
+            delay(500)
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -101,26 +145,51 @@ fun MusicApp() {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
+                        playlist = list
+                        currentIndex = index
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
                     BottomScreen.Search -> SearchScreen(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
+                        playlist = list
+                        currentIndex = index
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
                     BottomScreen.Library -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
+                        playlist = list
+                        currentIndex = index
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
                 }
             }
             currentSong?.let { song ->
-                MiniPlayer(song, isPlaying) {
-                    togglePlayback(context)
-                    isPlaying = !isPlaying
-                }
+                MiniPlayer(
+                    song = song,
+                    isPlaying = isPlaying,
+                    service = musicService,
+                    onToggle = {
+                        togglePlayback(context)
+                        isPlaying = !isPlaying
+                    },
+                    onNext = {
+                        musicService?.nextSong()
+                        if (playlist.isNotEmpty()) {
+                            currentIndex = (currentIndex + 1) % playlist.size
+                            currentSong = playlist[currentIndex]
+                        }
+                    },
+                    onPrevious = {
+                        musicService?.previousSong()
+                        if (playlist.isNotEmpty()) {
+                            currentIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+                            currentSong = playlist[currentIndex]
+                        }
+                    }
+                )
             }
         }
     }
@@ -207,23 +276,67 @@ fun togglePlayback(context: android.content.Context) {
 }
 
 @Composable
-fun MiniPlayer(song: Song, isPlaying: Boolean, onToggle: () -> Unit) {
+fun MiniPlayer(
+    song: Song,
+    isPlaying: Boolean,
+    service: MusicService?,
+    onToggle: () -> Unit,
+    onNext: () -> Unit,
+    onPrevious: () -> Unit
+) {
+    var sliderPosition by remember { mutableStateOf(0f) }
+    var duration by remember { mutableStateOf(0f) }
+    var dragging by remember { mutableStateOf(false) }
+
+    LaunchedEffect(service, isPlaying) {
+        while (true) {
+            if (service != null) {
+                duration = service.getDuration().toFloat()
+                if (!dragging && service.isPlaying()) {
+                    sliderPosition = service.getCurrentPosition().toFloat()
+                }
+            }
+            delay(500)
+        }
+    }
+
     Surface(shadowElevation = 4.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(song.title, style = MaterialTheme.typography.bodyLarge)
-                Text(song.artist, style = MaterialTheme.typography.bodySmall)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(song.title, style = MaterialTheme.typography.bodyLarge)
+                    Text(song.artist, style = MaterialTheme.typography.bodySmall)
+                }
+                IconButton(onClick = onPrevious) {
+                    Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous")
+                }
+                IconButton(onClick = onToggle) {
+                    val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
+                    val desc = if (isPlaying) "Pause" else "Play"
+                    Icon(icon, contentDescription = desc)
+                }
+                IconButton(onClick = onNext) {
+                    Icon(Icons.Filled.SkipNext, contentDescription = "Next")
+                }
             }
-            IconButton(onClick = onToggle) {
-                val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
-                val desc = if (isPlaying) "Pause" else "Play"
-                Icon(icon, contentDescription = desc)
-            }
+            Slider(
+                value = sliderPosition,
+                onValueChange = {
+                    sliderPosition = it
+                    dragging = true
+                },
+                onValueChangeFinished = {
+                    service?.seekTo(sliderPosition.toInt())
+                    dragging = false
+                },
+                valueRange = 0f..duration,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
