@@ -28,6 +28,9 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -82,6 +85,8 @@ fun MusicApp() {
     var playlist by remember { mutableStateOf<List<Song>>(emptyList()) }
     var currentIndex by remember { mutableStateOf(0) }
     var isPlaying by remember { mutableStateOf(false) }
+    var shuffleOn by remember { mutableStateOf(false) }
+    var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
     val connection = remember {
         object : ServiceConnection {
@@ -113,6 +118,8 @@ fun MusicApp() {
                     playlist = service.getSongs()
                     currentIndex = service.getCurrentIndex()
                 }
+                shuffleOn = service.isShuffle()
+                repeatMode = service.getRepeatMode()
             }
             delay(500)
         }
@@ -170,6 +177,8 @@ fun MusicApp() {
                 MiniPlayer(
                     song = song,
                     isPlaying = isPlaying,
+                    shuffleOn = shuffleOn,
+                    repeatMode = repeatMode,
                     service = musicService,
                     onToggle = {
                         togglePlayback(context)
@@ -188,6 +197,14 @@ fun MusicApp() {
                             currentIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
                             currentSong = playlist[currentIndex]
                         }
+                    },
+                    onShuffle = {
+                        musicService?.toggleShuffle()
+                        shuffleOn = musicService?.isShuffle() ?: shuffleOn
+                    },
+                    onRepeat = {
+                        musicService?.cycleRepeatMode()
+                        repeatMode = musicService?.getRepeatMode() ?: repeatMode
                     }
                 )
             }
@@ -279,10 +296,14 @@ fun togglePlayback(context: android.content.Context) {
 fun MiniPlayer(
     song: Song,
     isPlaying: Boolean,
+    shuffleOn: Boolean,
+    repeatMode: Int,
     service: MusicService?,
     onToggle: () -> Unit,
     onNext: () -> Unit,
-    onPrevious: () -> Unit
+    onPrevious: () -> Unit,
+    onShuffle: () -> Unit,
+    onRepeat: () -> Unit
 ) {
     var sliderPosition by remember { mutableStateOf(0f) }
     var duration by remember { mutableStateOf(0f) }
@@ -312,6 +333,10 @@ fun MiniPlayer(
                     Text(song.title, style = MaterialTheme.typography.bodyLarge)
                     Text(song.artist, style = MaterialTheme.typography.bodySmall)
                 }
+                IconButton(onClick = onShuffle) {
+                    val tint = if (shuffleOn) PinkAccent else MaterialTheme.colorScheme.onSurface
+                    Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle", tint = tint)
+                }
                 IconButton(onClick = onPrevious) {
                     Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous")
                 }
@@ -322,6 +347,14 @@ fun MiniPlayer(
                 }
                 IconButton(onClick = onNext) {
                     Icon(Icons.Filled.SkipNext, contentDescription = "Next")
+                }
+                IconButton(onClick = onRepeat) {
+                    val icon = when (repeatMode) {
+                        1 -> Icons.Filled.RepeatOne
+                        else -> Icons.Filled.Repeat
+                    }
+                    val tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else PinkAccent
+                    Icon(icon, contentDescription = "Repeat", tint = tint)
                 }
             }
             Slider(
