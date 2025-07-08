@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
@@ -233,14 +234,16 @@ fun togglePlayback(context: android.content.Context) {
 
 @Composable
 fun MiniPlayer(song: Song, isPlaying: Boolean, service: MusicService?, onToggle: () -> Unit) {
-    var progress by remember { mutableStateOf(0f) }
+    var sliderPosition by remember { mutableStateOf(0f) }
+    var duration by remember { mutableStateOf(0f) }
+    var dragging by remember { mutableStateOf(false) }
 
     LaunchedEffect(service, isPlaying) {
         while (true) {
-            if (service != null && service.isPlaying()) {
-                val dur = service.getDuration()
-                if (dur > 0) {
-                    progress = service.getCurrentPosition().toFloat() / dur
+            if (service != null) {
+                duration = service.getDuration().toFloat()
+                if (!dragging && service.isPlaying()) {
+                    sliderPosition = service.getCurrentPosition().toFloat()
                 }
             }
             delay(500)
@@ -265,7 +268,19 @@ fun MiniPlayer(song: Song, isPlaying: Boolean, service: MusicService?, onToggle:
                     Icon(icon, contentDescription = desc)
                 }
             }
-            LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
+            Slider(
+                value = sliderPosition,
+                onValueChange = {
+                    sliderPosition = it
+                    dragging = true
+                },
+                onValueChangeFinished = {
+                    service?.seekTo(sliderPosition.toInt())
+                    dragging = false
+                },
+                valueRange = 0f..duration,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
