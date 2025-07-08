@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import android.media.MediaPlayer
 import com.example.dsmusic.R
+import android.net.Uri
 
 class MusicService : Service() {
 
@@ -148,7 +149,7 @@ class MusicService : Service() {
     private fun playSong(song: Song) {
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
+            setDataSource(this@MusicService, Uri.parse(song.uri))
             prepare()
             start()
 

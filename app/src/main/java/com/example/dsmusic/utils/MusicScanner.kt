@@ -1,6 +1,7 @@
 package com.example.dsmusic.utils
 
 import android.content.Context
+import android.content.ContentUris
 import android.provider.MediaStore
 import com.example.dsmusic.model.Song
 
@@ -13,9 +14,9 @@ object MusicScanner {
 
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
+            MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DATA
+            MediaStore.Audio.Media.ARTIST
         )
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
 
@@ -26,14 +27,15 @@ object MusicScanner {
             null,
             null
         )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-            val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
                 val title = cursor.getString(titleColumn)
                 val artist = cursor.getString(artistColumn)
-                val path = cursor.getString(pathColumn)
-                songs.add(Song(title, artist, path))
+                val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
+                songs.add(Song(title, artist, uri.toString()))
             }
         }
         return songs
