@@ -148,7 +148,7 @@ class MusicService : Service() {
     private fun playSong(song: Song) {
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(song.path)
+            setDataSource(this@MusicService, android.net.Uri.parse(song.path))
             prepare()
             start()
 
