@@ -33,6 +33,8 @@ import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -245,6 +247,8 @@ fun SearchScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var selectedAlbum by remember { mutableStateOf<String?>(null) }
+    var albumsExpanded by remember { mutableStateOf(true) }
+    var songsExpanded by remember { mutableStateOf(true) }
     val focusManager = LocalFocusManager.current
     val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) || it.album.contains(query, true) }
     val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
@@ -263,17 +267,50 @@ fun SearchScreen(
         LazyColumn(modifier = Modifier.weight(1f)) {
             if (selectedAlbum == null) {
                 if (albums.isNotEmpty()) {
-                    item { Text("Albums", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.titleMedium) }
-                    items(albums) { album ->
-                        AlbumItem(album) { selectedAlbum = album }
+                    item {
+                        ListItem(
+                            headlineContent = { Text("Albums") },
+                            trailingContent = {
+                                IconButton(onClick = { albumsExpanded = !albumsExpanded }) {
+                                    val icon = if (albumsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
+                                    Icon(icon, contentDescription = null)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { albumsExpanded = !albumsExpanded }
+                        )
+                        HorizontalDivider()
+                    }
+                    if (albumsExpanded) {
+                        items(albums) { album ->
+                            AlbumItem(album) { selectedAlbum = album }
+                        }
                     }
                 }
-                itemsIndexed(filtered) { index, song ->
-                    SongItem(
-                        song = song,
-                        onClick = { onSongClick(song, index, filtered) },
-                        isCurrent = song.uri == currentSong?.uri
+                item {
+                    ListItem(
+                        headlineContent = { Text("Chansons") },
+                        trailingContent = {
+                            IconButton(onClick = { songsExpanded = !songsExpanded }) {
+                                val icon = if (songsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
+                                Icon(icon, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { songsExpanded = !songsExpanded }
                     )
+                    HorizontalDivider()
+                }
+                if (songsExpanded) {
+                    itemsIndexed(filtered) { index, song ->
+                        SongItem(
+                            song = song,
+                            onClick = { onSongClick(song, index, filtered) },
+                            isCurrent = song.uri == currentSong?.uri
+                        )
+                    }
                 }
             } else {
                 item {
