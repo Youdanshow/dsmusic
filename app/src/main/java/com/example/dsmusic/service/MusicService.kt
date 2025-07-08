@@ -65,6 +65,10 @@ class MusicService : Service() {
             ACTION_START -> {
                 val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
                 songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
+                if (songs.isEmpty()) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
                 currentIndex = intent.getIntExtra("INDEX", 0)
                 playSong(songs[currentIndex])
             }
@@ -125,7 +129,7 @@ class MusicService : Service() {
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
-        currentIndex = if (isShuffling) {
+        currentIndex = if (isShuffling && songs.size > 1) {
             (songs.indices - currentIndex).random()
         } else {
             (currentIndex + 1) % songs.size
@@ -143,7 +147,7 @@ class MusicService : Service() {
         mediaPlayer?.release()
 
         val atFirst = currentIndex == 0
-        currentIndex = if (isShuffling) {
+        currentIndex = if (isShuffling && songs.size > 1) {
             (songs.indices - currentIndex).random()
         } else {
             if (currentIndex - 1 < 0) songs.size - 1 else currentIndex - 1
