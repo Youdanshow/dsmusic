@@ -34,6 +34,8 @@ import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
+import com.example.dsmusic.ui.theme.PinkAccent
+import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
@@ -97,21 +99,21 @@ fun MusicApp() {
             .fillMaxSize()) {
             Box(modifier = Modifier.weight(1f)) {
                 when (currentScreen) {
-                    BottomScreen.Home -> SongList(songs) { song, index, list ->
+                    BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         currentSong = song
                         isPlaying = true
-                    }
-                    BottomScreen.Search -> SearchScreen(songs) { song, index, list ->
+                    }, currentSong = currentSong)
+                    BottomScreen.Search -> SearchScreen(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         currentSong = song
                         isPlaying = true
-                    }
-                    BottomScreen.Library -> SongList(songs) { song, index, list ->
+                    }, currentSong = currentSong)
+                    BottomScreen.Library -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         currentSong = song
                         isPlaying = true
-                    }
+                    }, currentSong = currentSong)
                 }
             }
             currentSong?.let { song ->
@@ -129,11 +131,16 @@ enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"
 @Composable
 fun SongList(
     songs: List<Song>,
-    onSongClick: (Song, Int, List<Song>) -> Unit
+    onSongClick: (Song, Int, List<Song>) -> Unit,
+    currentSong: Song?
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         itemsIndexed(songs) { index, song ->
-            SongItem(song) { onSongClick(song, index, songs) }
+            SongItem(
+                song = song,
+                onClick = { onSongClick(song, index, songs) },
+                isCurrent = song.uri == currentSong?.uri
+            )
         }
     }
 }
@@ -141,7 +148,8 @@ fun SongList(
 @Composable
 fun SearchScreen(
     allSongs: List<Song>,
-    onSongClick: (Song, Int, List<Song>) -> Unit
+    onSongClick: (Song, Int, List<Song>) -> Unit,
+    currentSong: Song?
 ) {
     var query by remember { mutableStateOf("") }
     val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) }
@@ -154,19 +162,29 @@ fun SearchScreen(
         )
         LazyColumn {
             itemsIndexed(filtered) { index, song ->
-                SongItem(song) { onSongClick(song, index, filtered) }
+                SongItem(
+                    song = song,
+                    onClick = { onSongClick(song, index, filtered) },
+                    isCurrent = song.uri == currentSong?.uri
+                )
             }
         }
     }
 }
 
 @Composable
-fun SongItem(song: Song, onClick: () -> Unit) {
+fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
+    val colors = ListItemDefaults.colors(
+        containerColor = if (isCurrent) PinkAccent else MaterialTheme.colorScheme.surface,
+        headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
+        supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
+    )
     ListItem(
         headlineContent = { Text(song.title) },
         supportingContent = { Text(song.artist) },
+        colors = colors,
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .clickable { onClick() }
     )
     HorizontalDivider()
