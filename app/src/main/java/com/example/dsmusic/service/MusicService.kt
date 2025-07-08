@@ -104,6 +104,10 @@ class MusicService : Service() {
         repeatMode = (repeatMode + 1) % 3
     }
 
+    fun isShuffle(): Boolean = isShuffling
+
+    fun getRepeatMode(): Int = repeatMode
+
     private fun togglePlay() {
         mediaPlayer?.let {
             if (it.isPlaying) {
