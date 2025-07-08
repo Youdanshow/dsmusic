@@ -79,6 +79,8 @@ fun MusicApp() {
     val songs by remember(context) { mutableStateOf(MusicScanner.getAllAudioFiles(context)) }
     var currentScreen by remember { mutableStateOf(BottomScreen.Home) }
     var currentSong by remember { mutableStateOf<Song?>(null) }
+    var playlist by remember { mutableStateOf<List<Song>>(emptyList()) }
+    var currentIndex by remember { mutableStateOf(0) }
     var isPlaying by remember { mutableStateOf(false) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
     val connection = remember {
@@ -129,16 +131,22 @@ fun MusicApp() {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
+                        playlist = list
+                        currentIndex = index
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
                     BottomScreen.Search -> SearchScreen(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
+                        playlist = list
+                        currentIndex = index
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
                     BottomScreen.Library -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
+                        playlist = list
+                        currentIndex = index
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
@@ -153,8 +161,20 @@ fun MusicApp() {
                         togglePlayback(context)
                         isPlaying = !isPlaying
                     },
-                    onNext = { nextSong(context) },
-                    onPrevious = { previousSong(context) }
+                    onNext = {
+                        musicService?.nextSong()
+                        if (playlist.isNotEmpty()) {
+                            currentIndex = (currentIndex + 1) % playlist.size
+                            currentSong = playlist[currentIndex]
+                        }
+                    },
+                    onPrevious = {
+                        musicService?.previousSong()
+                        if (playlist.isNotEmpty()) {
+                            currentIndex = if (currentIndex - 1 < 0) playlist.size - 1 else currentIndex - 1
+                            currentSong = playlist[currentIndex]
+                        }
+                    }
                 )
             }
         }
@@ -237,20 +257,6 @@ fun startPlayback(context: android.content.Context, songs: List<Song>, index: In
 fun togglePlayback(context: android.content.Context) {
     val intent = Intent(context, MusicService::class.java).apply {
         action = MusicService.ACTION_TOGGLE_PLAY
-    }
-    ContextCompat.startForegroundService(context, intent)
-}
-
-fun nextSong(context: android.content.Context) {
-    val intent = Intent(context, MusicService::class.java).apply {
-        action = MusicService.ACTION_NEXT
-    }
-    ContextCompat.startForegroundService(context, intent)
-}
-
-fun previousSong(context: android.content.Context) {
-    val intent = Intent(context, MusicService::class.java).apply {
-        action = MusicService.ACTION_PREVIOUS
     }
     ContextCompat.startForegroundService(context, intent)
 }

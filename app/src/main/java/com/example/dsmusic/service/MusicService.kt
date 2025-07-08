@@ -88,6 +88,8 @@ class MusicService : Service() {
 
     fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
 
+    fun getCurrentSong(): Song? = songs.getOrNull(currentIndex)
+
     fun isPlaying(): Boolean = mediaPlayer?.isPlaying ?: false
 
     fun toggleShuffle() {
@@ -111,7 +113,7 @@ class MusicService : Service() {
         }
     }
 
-    private fun nextSong() {
+    fun nextSong() {
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
@@ -128,7 +130,7 @@ class MusicService : Service() {
         playSong(songs[currentIndex])
     }
 
-    private fun previousSong() {
+    fun previousSong() {
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
