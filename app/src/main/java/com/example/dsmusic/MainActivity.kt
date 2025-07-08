@@ -334,6 +334,10 @@ fun SearchScreen(
         if (ascending) sorted else sorted.reversed()
     }
     val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
+    val sortedAlbums = remember(albums, ascending) {
+        val base = albums.sorted()
+        if (ascending) base else base.reversed()
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Box {
@@ -388,7 +392,7 @@ fun SearchScreen(
         )
         LazyColumn(modifier = Modifier.weight(1f)) {
             if (selectedAlbum == null) {
-                if (albums.isNotEmpty()) {
+                if (sortedAlbums.isNotEmpty()) {
                     item {
                         ListItem(
                             headlineContent = { Text("Albums") },
@@ -405,7 +409,7 @@ fun SearchScreen(
                         HorizontalDivider()
                     }
                     if (albumsExpanded) {
-                        items(albums) { album ->
+                        items(sortedAlbums) { album ->
                             AlbumItem(album) { selectedAlbum = album }
                         }
                     }
