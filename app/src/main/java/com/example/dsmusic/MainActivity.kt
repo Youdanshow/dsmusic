@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
@@ -52,7 +53,7 @@ import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
 import com.example.dsmusic.ui.theme.PinkAccent
-import com.example.dsmusic.ui.theme.TextWhite
+import com.example.dsmusic.ui.theme.TextBlack
 import com.example.dsmusic.utils.MusicScanner
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
@@ -142,6 +143,11 @@ fun MusicApp() {
                     NavigationBarItem(
                         selected = currentScreen == screen,
                         onClick = { currentScreen = screen },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = TextBlack,
+                            selectedIconColor = TextBlack,
+                            selectedTextColor = TextBlack
+                        ),
                         icon = {
                             when (screen) {
                                 BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
@@ -482,8 +488,8 @@ fun AlbumItem(album: String, onClick: () -> Unit) {
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
         containerColor = if (isCurrent) PinkAccent else MaterialTheme.colorScheme.surface,
-        headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
-        supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
+        headlineColor = if (isCurrent) TextBlack else MaterialTheme.colorScheme.onSurface,
+        supportingColor = if (isCurrent) TextBlack else MaterialTheme.colorScheme.onSurfaceVariant
     )
     ListItem(
         headlineContent = { Text(song.title) },
