@@ -9,19 +9,26 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
@@ -61,6 +68,8 @@ fun MusicApp() {
     val context = LocalContext.current
     val songs by remember(context) { mutableStateOf(MusicScanner.getAllAudioFiles(context)) }
     var currentScreen by remember { mutableStateOf(BottomScreen.Home) }
+    var currentSong by remember { mutableStateOf<Song?>(null) }
+    var isPlaying by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -82,11 +91,33 @@ fun MusicApp() {
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            when (currentScreen) {
-                BottomScreen.Home -> SongList(songs)
-                BottomScreen.Search -> SearchScreen(songs)
-                BottomScreen.Library -> SongList(songs)
+        Column(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()) {
+            Box(modifier = Modifier.weight(1f)) {
+                when (currentScreen) {
+                    BottomScreen.Home -> SongList(songs) { song, index, list ->
+                        startPlayback(context, list, index)
+                        currentSong = song
+                        isPlaying = true
+                    }
+                    BottomScreen.Search -> SearchScreen(songs) { song, index, list ->
+                        startPlayback(context, list, index)
+                        currentSong = song
+                        isPlaying = true
+                    }
+                    BottomScreen.Library -> SongList(songs) { song, index, list ->
+                        startPlayback(context, list, index)
+                        currentSong = song
+                        isPlaying = true
+                    }
+                }
+            }
+            currentSong?.let { song ->
+                MiniPlayer(song, isPlaying) {
+                    togglePlayback(context)
+                    isPlaying = !isPlaying
+                }
             }
         }
     }
@@ -95,20 +126,24 @@ fun MusicApp() {
 enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
 
 @Composable
-fun SongList(songs: List<Song>) {
-    val context = LocalContext.current
+fun SongList(
+    songs: List<Song>,
+    onSongClick: (Song, Int, List<Song>) -> Unit
+) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         itemsIndexed(songs) { index, song ->
-            SongItem(song) { startPlayback(context, songs, index) }
+            SongItem(song) { onSongClick(song, index, songs) }
         }
     }
 }
 
 @Composable
-fun SearchScreen(allSongs: List<Song>) {
+fun SearchScreen(
+    allSongs: List<Song>,
+    onSongClick: (Song, Int, List<Song>) -> Unit
+) {
     var query by remember { mutableStateOf("") }
     val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) }
-    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize()) {
         TextField(
             value = query,
@@ -118,7 +153,7 @@ fun SearchScreen(allSongs: List<Song>) {
         )
         LazyColumn {
             itemsIndexed(filtered) { index, song ->
-                SongItem(song) { startPlayback(context, filtered, index) }
+                SongItem(song) { onSongClick(song, index, filtered) }
             }
         }
     }
@@ -143,4 +178,33 @@ fun startPlayback(context: android.content.Context, songs: List<Song>, index: In
         putExtra("INDEX", index)
     }
     ContextCompat.startForegroundService(context, intent)
+}
+
+fun togglePlayback(context: android.content.Context) {
+    val intent = Intent(context, MusicService::class.java).apply {
+        action = MusicService.ACTION_TOGGLE_PLAY
+    }
+    ContextCompat.startForegroundService(context, intent)
+}
+
+@Composable
+fun MiniPlayer(song: Song, isPlaying: Boolean, onToggle: () -> Unit) {
+    Surface(shadowElevation = 4.dp) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(song.title, style = MaterialTheme.typography.bodyLarge)
+                Text(song.artist, style = MaterialTheme.typography.bodySmall)
+            }
+            IconButton(onClick = onToggle) {
+                val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
+                val desc = if (isPlaying) "Pause" else "Play"
+                Icon(icon, contentDescription = desc)
+            }
+        }
+    }
 }
