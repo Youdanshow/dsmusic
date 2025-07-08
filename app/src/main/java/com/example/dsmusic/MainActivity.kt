@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestAudioPermission()
+        requestNotificationPermission()
         setContent {
             DSMusicTheme {
                 MusicApp()
@@ -82,6 +83,15 @@ class MainActivity : ComponentActivity() {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
                 registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
                     .launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PermissionChecker.PERMISSION_GRANTED) {
+                registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+                    .launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
     }
