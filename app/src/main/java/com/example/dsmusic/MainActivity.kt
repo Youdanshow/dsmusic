@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -164,7 +165,7 @@ fun MusicApp() {
                         currentIndex = index
                         currentSong = song
                         isPlaying = true
-                    }, currentSong = currentSong)
+                    }, currentSong = currentSong, showFilter = true)
                     BottomScreen.Search -> SearchScreen(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         playlist = list
@@ -222,19 +223,69 @@ fun MusicApp() {
 
 enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
 
+enum class SortField(val label: String) {
+    TITLE("Nom"),
+    ALBUM("Album"),
+    ARTIST("Artiste"),
+    DURATION("Durée"),
+    SIZE("Taille")
+}
 @Composable
 fun SongList(
     songs: List<Song>,
     onSongClick: (Song, Int, List<Song>) -> Unit,
-    currentSong: Song?
+    currentSong: Song?,
+    showFilter: Boolean = false,
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        itemsIndexed(songs) { index, song ->
-            SongItem(
-                song = song,
-                onClick = { onSongClick(song, index, songs) },
-                isCurrent = song.uri == currentSong?.uri
-            )
+    var sortField by remember { mutableStateOf(SortField.TITLE) }
+    var ascending by remember { mutableStateOf(true) }
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    val sortedSongs = remember(songs, sortField, ascending) {
+        val sorted = when (sortField) {
+            SortField.TITLE -> songs.sortedBy { it.title }
+            SortField.ALBUM -> songs.sortedBy { it.album }
+            SortField.ARTIST -> songs.sortedBy { it.artist }
+            SortField.DURATION -> songs.sortedBy { it.duration }
+            SortField.SIZE -> songs.sortedBy { it.size }
+        }
+        if (ascending) sorted else sorted.reversed()
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (showFilter) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    SortField.values().forEach { field ->
+                        DropdownMenuItem(
+                            text = { Text(field.label) },
+                            onClick = {
+                                sortField = field
+                                menuExpanded = false
+                            }
+                        )
+                    }
+                    DropdownMenuItem(
+                        text = { Text(if (ascending) "Ordre décroissant" else "Ordre croissant") },
+                        onClick = {
+                            ascending = !ascending
+                            menuExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            itemsIndexed(sortedSongs) { index, song ->
+                SongItem(
+                    song = song,
+                    onClick = { onSongClick(song, index, sortedSongs) },
+                    isCurrent = song.uri == currentSong?.uri
+                )
+            }
         }
     }
 }
@@ -243,16 +294,52 @@ fun SongList(
 fun SearchScreen(
     allSongs: List<Song>,
     onSongClick: (Song, Int, List<Song>) -> Unit,
-    currentSong: Song?
+    currentSong: Song?,
 ) {
     var query by remember { mutableStateOf("") }
     var selectedAlbum by remember { mutableStateOf<String?>(null) }
     var albumsExpanded by remember { mutableStateOf(true) }
     var songsExpanded by remember { mutableStateOf(true) }
+    var sortField by remember { mutableStateOf(SortField.TITLE) }
+    var ascending by remember { mutableStateOf(true) }
+    var menuExpanded by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val filtered = allSongs.filter { it.title.contains(query, true) || it.artist.contains(query, true) || it.album.contains(query, true) }
+    val sortedFiltered = remember(filtered, sortField, ascending) {
+        val sorted = when (sortField) {
+            SortField.TITLE -> filtered.sortedBy { it.title }
+            SortField.ALBUM -> filtered.sortedBy { it.album }
+            SortField.ARTIST -> filtered.sortedBy { it.artist }
+            SortField.DURATION -> filtered.sortedBy { it.duration }
+            SortField.SIZE -> filtered.sortedBy { it.size }
+        }
+        if (ascending) sorted else sorted.reversed()
+    }
     val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
     Column(modifier = Modifier.fillMaxSize()) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            IconButton(onClick = { menuExpanded = true }) {
+                Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
+            }
+            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                SortField.values().forEach { field ->
+                    DropdownMenuItem(
+                        text = { Text(field.label) },
+                        onClick = {
+                            sortField = field
+                            menuExpanded = false
+                        }
+                    )
+                }
+                DropdownMenuItem(
+                    text = { Text(if (ascending) "Ordre décroissant" else "Ordre croissant") },
+                    onClick = {
+                        ascending = !ascending
+                        menuExpanded = false
+                    }
+                )
+            }
+        }
         TextField(
             value = query,
             onValueChange = { query = it },
@@ -304,10 +391,10 @@ fun SearchScreen(
                     HorizontalDivider()
                 }
                 if (songsExpanded) {
-                    itemsIndexed(filtered) { index, song ->
+                    itemsIndexed(sortedFiltered) { index, song ->
                         SongItem(
                             song = song,
-                            onClick = { onSongClick(song, index, filtered) },
+                            onClick = { onSongClick(song, index, sortedFiltered) },
                             isCurrent = song.uri == currentSong?.uri
                         )
                     }
@@ -322,10 +409,20 @@ fun SearchScreen(
                     }
                 }
                 val albumSongs = allSongs.filter { it.album == selectedAlbum }
-                itemsIndexed(albumSongs) { index, song ->
+                val sortedAlbum = remember(albumSongs, sortField, ascending) {
+                    val sorted = when (sortField) {
+                        SortField.TITLE -> albumSongs.sortedBy { it.title }
+                        SortField.ALBUM -> albumSongs.sortedBy { it.album }
+                        SortField.ARTIST -> albumSongs.sortedBy { it.artist }
+                        SortField.DURATION -> albumSongs.sortedBy { it.duration }
+                        SortField.SIZE -> albumSongs.sortedBy { it.size }
+                    }
+                    if (ascending) sorted else sorted.reversed()
+                }
+                itemsIndexed(sortedAlbum) { index, song ->
                     SongItem(
                         song = song,
-                        onClick = { onSongClick(song, index, albumSongs) },
+                        onClick = { onSongClick(song, index, sortedAlbum) },
                         isCurrent = song.uri == currentSong?.uri
                     )
                 }
@@ -333,7 +430,6 @@ fun SearchScreen(
         }
     }
 }
-
 @Composable
 fun AlbumItem(album: String, onClick: () -> Unit) {
     ListItem(
