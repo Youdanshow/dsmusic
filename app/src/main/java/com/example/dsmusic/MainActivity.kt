@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -143,10 +145,17 @@ fun MusicApp() {
                 }
             }
             currentSong?.let { song ->
-                MiniPlayer(song, isPlaying, musicService) {
-                    togglePlayback(context)
-                    isPlaying = !isPlaying
-                }
+                MiniPlayer(
+                    song = song,
+                    isPlaying = isPlaying,
+                    service = musicService,
+                    onToggle = {
+                        togglePlayback(context)
+                        isPlaying = !isPlaying
+                    },
+                    onNext = { nextSong(context) },
+                    onPrevious = { previousSong(context) }
+                )
             }
         }
     }
@@ -232,8 +241,29 @@ fun togglePlayback(context: android.content.Context) {
     ContextCompat.startForegroundService(context, intent)
 }
 
+fun nextSong(context: android.content.Context) {
+    val intent = Intent(context, MusicService::class.java).apply {
+        action = MusicService.ACTION_NEXT
+    }
+    ContextCompat.startForegroundService(context, intent)
+}
+
+fun previousSong(context: android.content.Context) {
+    val intent = Intent(context, MusicService::class.java).apply {
+        action = MusicService.ACTION_PREVIOUS
+    }
+    ContextCompat.startForegroundService(context, intent)
+}
+
 @Composable
-fun MiniPlayer(song: Song, isPlaying: Boolean, service: MusicService?, onToggle: () -> Unit) {
+fun MiniPlayer(
+    song: Song,
+    isPlaying: Boolean,
+    service: MusicService?,
+    onToggle: () -> Unit,
+    onNext: () -> Unit,
+    onPrevious: () -> Unit
+) {
     var sliderPosition by remember { mutableStateOf(0f) }
     var duration by remember { mutableStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
@@ -262,10 +292,16 @@ fun MiniPlayer(song: Song, isPlaying: Boolean, service: MusicService?, onToggle:
                     Text(song.title, style = MaterialTheme.typography.bodyLarge)
                     Text(song.artist, style = MaterialTheme.typography.bodySmall)
                 }
+                IconButton(onClick = onPrevious) {
+                    Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous")
+                }
                 IconButton(onClick = onToggle) {
                     val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
                     val desc = if (isPlaying) "Pause" else "Play"
                     Icon(icon, contentDescription = desc)
+                }
+                IconButton(onClick = onNext) {
+                    Icon(Icons.Filled.SkipNext, contentDescription = "Next")
                 }
             }
             Slider(
