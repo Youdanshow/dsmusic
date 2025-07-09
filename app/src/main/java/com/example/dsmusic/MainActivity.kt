@@ -497,7 +497,7 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
 }
 
 fun startPlayback(context: android.content.Context, songs: List<Song>, index: Int) {
-    val intent = Intent(context.applicationContext, MusicService::class.java).apply {
+    val intent = Intent(context, MusicService::class.java).apply {
         action = MusicService.ACTION_START
         putExtra("SONGS", Gson().toJson(songs))
         putExtra("INDEX", index)
@@ -506,7 +506,7 @@ fun startPlayback(context: android.content.Context, songs: List<Song>, index: In
 }
 
 fun togglePlayback(context: android.content.Context) {
-    val intent = Intent(context.applicationContext, MusicService::class.java).apply {
+    val intent = Intent(context, MusicService::class.java).apply {
         action = MusicService.ACTION_TOGGLE_PLAY
     }
     ContextCompat.startForegroundService(context.applicationContext, intent)
