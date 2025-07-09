@@ -66,7 +66,9 @@ class MusicService : Service() {
                 val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
                 songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
                 currentIndex = intent.getIntExtra("INDEX", 0)
-                playSong(songs[currentIndex])
+                if (songs.isNotEmpty() && currentIndex in songs.indices) {
+                    playSong(songs[currentIndex])
+                }
             }
             ACTION_TOGGLE_PLAY -> togglePlay()
             ACTION_NEXT -> nextSong()
@@ -157,20 +159,27 @@ class MusicService : Service() {
     }
 
     private fun playSong(song: Song) {
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(this@MusicService, Uri.parse(song.uri))
-            prepare()
-            start()
+        try {
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(this@MusicService, Uri.parse(song.uri))
+                prepare()
+                start()
 
-            setOnCompletionListener {
-                when (repeatMode) {
-                    1 -> playSong(songs[currentIndex])
-                    else -> nextSong()
+                setOnCompletionListener {
+                    when (repeatMode) {
+                        1 -> playSong(songs[currentIndex])
+                        else -> nextSong()
+                    }
                 }
             }
+            showNotification(song)
+        } catch (e: Exception) {
+            // Prevent crash if the file cannot be played
+            stopForeground(true)
+            mediaPlayer?.release()
+            mediaPlayer = null
         }
-        showNotification(song)
     }
 
     private fun showNotification(song: Song) {
