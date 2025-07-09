@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/accent_pink</item>
         <item name="colorSecondary">@color/accent_pink</item>
         <item name="android:colorBackground">@color/background_black</item>
