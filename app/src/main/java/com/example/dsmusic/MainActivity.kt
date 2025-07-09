@@ -50,6 +50,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
+import com.example.dsmusic.service.PlaybackHolder
 import com.example.dsmusic.ui.theme.DSMusicTheme
 import com.example.dsmusic.ui.theme.PinkAccent
 import com.example.dsmusic.ui.theme.TextWhite
@@ -497,9 +498,10 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
 }
 
 fun startPlayback(context: android.content.Context, songs: List<Song>, index: Int) {
+    // Store playlist in memory to avoid large binder extras
+    PlaybackHolder.songs = songs
     val intent = Intent(context, MusicService::class.java).apply {
         action = MusicService.ACTION_START
-        putExtra("SONGS", Gson().toJson(songs))
         putExtra("INDEX", index)
     }
     ContextCompat.startForegroundService(context, intent)

@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.dsmusic.model.Song
+import com.example.dsmusic.service.PlaybackHolder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import android.media.MediaPlayer
@@ -63,10 +64,15 @@ class MusicService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
-                songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
+                val songsJson = intent.getStringExtra("SONGS")
+                songs = if (songsJson != null) {
+                    Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
+                } else {
+                    PlaybackHolder.songs.toMutableList()
+                }
                 currentIndex = intent.getIntExtra("INDEX", 0)
                 if (songs.isNotEmpty() && currentIndex in songs.indices) {
+                    PlaybackHolder.songs = songs
                     playSong(songs[currentIndex])
                 }
             }
