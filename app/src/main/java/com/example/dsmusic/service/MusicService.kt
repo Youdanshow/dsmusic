@@ -10,7 +10,9 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.Manifest
 import androidx.core.app.NotificationCompat
+import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -174,6 +176,16 @@ class MusicService : Service() {
     }
 
     private fun showNotification(song: Song) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (PermissionChecker.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PermissionChecker.PERMISSION_GRANTED
+            ) {
+                return
+            }
+        }
+
         val toggleIntent = Intent(this, MusicService::class.java).apply { action = ACTION_TOGGLE_PLAY }
         val nextIntent = Intent(this, MusicService::class.java).apply { action = ACTION_NEXT }
         val previousIntent = Intent(this, MusicService::class.java).apply { action = ACTION_PREVIOUS }
