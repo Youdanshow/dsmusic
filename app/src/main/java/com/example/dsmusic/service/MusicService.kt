@@ -74,6 +74,8 @@ class MusicService : Service() {
                 if (songs.isNotEmpty() && currentIndex in songs.indices) {
                     PlaybackHolder.songs = songs
                     playSong(songs[currentIndex])
+                } else {
+                    return START_NOT_STICKY
                 }
             }
             ACTION_TOGGLE_PLAY -> togglePlay()
