@@ -63,31 +63,32 @@
 
 ## Setup
 1. Mode développeur sur téléphone : activer le débogage USB et désactiver le blocage automatique.
-2. Utiliser `gradle` version 8.7 :
+2. Au premier lancement, accepter les permissions d'accès aux fichiers audio et d'affichage des notifications (Android 13+).
+3. Utiliser `gradle` version 8.7 :
    ```bash
    & "<path-to-gradle>"/gradle.bat wrapper --gradle-version 8.7
    ```
-3. Construire le projet :
+4. Construire le projet :
    ```bash
    ./gradlew clean build
    ```
-4. Lancer l’application sur l’appareil :
+5. Lancer l’application sur l’appareil :
    ```bash
    & "<path-to-adb>"/adb shell am start -n com.example.dsmusic/.MainActivity
    ```
-5. Vérifier les appareils connectés puis installer l’APK :
+6. Vérifier les appareils connectés puis installer l’APK :
    ```bash
    & "<path-to-adb>"/adb devices
    ./gradlew installDebug
    ```
-6. En cas de problème de connexion USB :
+7. En cas de problème de connexion USB :
    ```bash
    & "<path-to-adb>"/adb kill-server
    & "<path-to-adb>"/adb start-server
    & "<path-to-adb>"/adb devices
    ./gradlew installDebug
    ```
-6. Tester une branche du projet
+8. Tester une branche du projet
     ```bash
     git fetch origin <branch-name>
     git switch <branch-name>
