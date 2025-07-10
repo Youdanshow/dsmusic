@@ -131,11 +131,17 @@ class MusicService : Service() {
     }
 
     fun nextSong() {
+        if (songs.isEmpty()) return
+
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
         currentIndex = if (isShuffling) {
-            (songs.indices - currentIndex).random()
+            if (songs.size > 1) {
+                (songs.indices - currentIndex).random()
+            } else {
+                currentIndex
+            }
         } else {
             (currentIndex + 1) % songs.size
         }
@@ -148,12 +154,18 @@ class MusicService : Service() {
     }
 
     fun previousSong() {
+        if (songs.isEmpty()) return
+
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
         val atFirst = currentIndex == 0
         currentIndex = if (isShuffling) {
-            (songs.indices - currentIndex).random()
+            if (songs.size > 1) {
+                (songs.indices - currentIndex).random()
+            } else {
+                currentIndex
+            }
         } else {
             if (currentIndex - 1 < 0) songs.size - 1 else currentIndex - 1
         }
