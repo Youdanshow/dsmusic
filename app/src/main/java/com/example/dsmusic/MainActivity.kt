@@ -498,16 +498,14 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
 }
 
 fun startPlayback(context: android.content.Context, songs: List<Song>, index: Int) {
+    PlaybackHolder.songs = songs
     val json = Gson().toJson(songs)
     val intent = Intent(context, MusicService::class.java).apply {
         action = MusicService.ACTION_START
         putExtra("INDEX", index)
-        if (json.toByteArray().size < 900_000) {
-            // Small playlist, pass directly
+        if (json.toByteArray().size < 500_000) {
+            // Provide playlist to service when small enough to avoid binder limits
             putExtra("SONGS", json)
-        } else {
-            // Large playlist, keep in memory
-            PlaybackHolder.songs = songs
         }
     }
     ContextCompat.startForegroundService(context, intent)
