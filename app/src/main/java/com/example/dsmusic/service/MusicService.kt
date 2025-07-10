@@ -211,9 +211,9 @@ class MusicService : Service() {
         val stopPending = PendingIntent.getService(this, 3, stopIntent, flags)
 
         val playIcon = if (mediaPlayer?.isPlaying == true) {
-            android.R.drawable.ic_media_pause
+            R.drawable.ic_notification_pause
         } else {
-            android.R.drawable.ic_media_play
+            R.drawable.ic_notification_play
         }
 
         notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -222,10 +222,10 @@ class MusicService : Service() {
             .setSmallIcon(playIcon)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(android.R.drawable.ic_delete, "❌", stopPending)
-            .addAction(android.R.drawable.ic_media_previous, "⏪", previousPending)
-            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "⏸️" else "▶️", togglePending)
-            .addAction(android.R.drawable.ic_media_next, "⏩", nextPending)
+            .addAction(R.drawable.ic_notification_close, "Close", stopPending)
+            .addAction(R.drawable.ic_notification_previous, "Prev", previousPending)
+            .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Play", togglePending)
+            .addAction(R.drawable.ic_notification_next, "Next", nextPending)
 
         startForeground(NOTIFICATION_ID, notificationBuilder.build())
     }
