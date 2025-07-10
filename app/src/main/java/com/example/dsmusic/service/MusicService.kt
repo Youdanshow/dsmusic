@@ -17,6 +17,7 @@ import com.google.gson.reflect.TypeToken
 import android.media.MediaPlayer
 import com.example.dsmusic.R
 import android.net.Uri
+import com.example.dsmusic.utils.PlaybackHolder
 
 class MusicService : Service() {
 
@@ -63,10 +64,18 @@ class MusicService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
-                songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
-                currentIndex = intent.getIntExtra("INDEX", 0)
-                playSong(songs[currentIndex])
+                val passed = PlaybackHolder.songs
+                if (passed.isNotEmpty()) {
+                    songs = passed.toMutableList()
+                    currentIndex = intent.getIntExtra("INDEX", 0)
+                    playSong(songs[currentIndex])
+                    PlaybackHolder.songs = emptyList()
+                } else {
+                    val songsJson = intent.getStringExtra("SONGS") ?: return START_NOT_STICKY
+                    songs = Gson().fromJson(songsJson, object : TypeToken<MutableList<Song>>() {}.type)
+                    currentIndex = intent.getIntExtra("INDEX", 0)
+                    playSong(songs[currentIndex])
+                }
             }
             ACTION_TOGGLE_PLAY -> togglePlay()
             ACTION_NEXT -> nextSong()

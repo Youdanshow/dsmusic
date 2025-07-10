@@ -54,6 +54,7 @@ import com.example.dsmusic.ui.theme.DSMusicTheme
 import com.example.dsmusic.ui.theme.PinkAccent
 import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
+import com.example.dsmusic.utils.PlaybackHolder
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.ImeAction
@@ -497,9 +498,9 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
 }
 
 fun startPlayback(context: android.content.Context, songs: List<Song>, index: Int) {
+    PlaybackHolder.songs = songs
     val intent = Intent(context, MusicService::class.java).apply {
         action = MusicService.ACTION_START
-        putExtra("SONGS", Gson().toJson(songs))
         putExtra("INDEX", index)
     }
     ContextCompat.startForegroundService(context, intent)
