@@ -317,7 +317,9 @@ fun SearchScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var selectedAlbum by remember { mutableStateOf<String?>(null) }
+    var selectedArtist by remember { mutableStateOf<String?>(null) }
     var albumsExpanded by remember { mutableStateOf(true) }
+    var artistsExpanded by remember { mutableStateOf(true) }
     var songsExpanded by remember { mutableStateOf(true) }
     var sortField by remember { mutableStateOf(SortField.TITLE) }
     var ascending by remember { mutableStateOf(true) }
@@ -337,6 +339,11 @@ fun SearchScreen(
     val albums = allSongs.map { it.album }.distinct().filter { it.contains(query, true) }
     val sortedAlbums = remember(albums, ascending) {
         val base = albums.sorted()
+        if (ascending) base else base.reversed()
+    }
+    val artists = allSongs.map { it.artist }.distinct().filter { it.contains(query, true) }
+    val sortedArtists = remember(artists, ascending) {
+        val base = artists.sorted()
         if (ascending) base else base.reversed()
     }
     Column(modifier = Modifier.fillMaxSize()) {
@@ -392,7 +399,29 @@ fun SearchScreen(
             keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
         )
         LazyColumn(modifier = Modifier.weight(1f)) {
-            if (selectedAlbum == null) {
+            if (selectedAlbum == null && selectedArtist == null) {
+                if (sortedArtists.isNotEmpty()) {
+                    item {
+                        ListItem(
+                            headlineContent = { Text("Artistes") },
+                            trailingContent = {
+                                IconButton(onClick = { artistsExpanded = !artistsExpanded }) {
+                                    val icon = if (artistsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
+                                    Icon(icon, contentDescription = null)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { artistsExpanded = !artistsExpanded }
+                        )
+                        HorizontalDivider()
+                    }
+                    if (artistsExpanded) {
+                        items(sortedArtists) { artist ->
+                            ArtistItem(artist) { selectedArtist = artist }
+                        }
+                    }
+                }
                 if (sortedAlbums.isNotEmpty()) {
                     item {
                         ListItem(
@@ -439,6 +468,31 @@ fun SearchScreen(
                         )
                     }
                 }
+            } else if (selectedArtist != null) {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        IconButton(onClick = { selectedArtist = null }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        }
+                        Text(text = selectedArtist ?: "")
+                    }
+                }
+                val artistSongs = allSongs.filter { it.artist == selectedArtist }
+                val sortedArtist = when (sortField) {
+                    SortField.TITLE -> artistSongs.sortedBy { it.title }
+                    SortField.ALBUM -> artistSongs.sortedBy { it.album }
+                    SortField.ARTIST -> artistSongs.sortedBy { it.artist }
+                    SortField.DURATION -> artistSongs.sortedBy { it.duration }
+                    SortField.SIZE -> artistSongs.sortedBy { it.size }
+                }.let { if (ascending) it else it.reversed() }
+
+                itemsIndexed(sortedArtist) { index, song ->
+                    SongItem(
+                        song = song,
+                        onClick = { onSongClick(song, index, sortedArtist) },
+                        isCurrent = song.uri == currentSong?.uri
+                    )
+                }
             } else {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -472,6 +526,17 @@ fun SearchScreen(
 fun AlbumItem(album: String, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(album) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    )
+    HorizontalDivider()
+}
+
+@Composable
+fun ArtistItem(artist: String, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(artist) },
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
