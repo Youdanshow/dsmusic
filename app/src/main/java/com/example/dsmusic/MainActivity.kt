@@ -318,9 +318,9 @@ fun SearchScreen(
     var query by remember { mutableStateOf("") }
     var selectedAlbum by remember { mutableStateOf<String?>(null) }
     var selectedArtist by remember { mutableStateOf<String?>(null) }
-    var albumsExpanded by remember { mutableStateOf(true) }
-    var artistsExpanded by remember { mutableStateOf(true) }
-    var songsExpanded by remember { mutableStateOf(true) }
+    var albumsExpanded by remember { mutableStateOf(false) }
+    var artistsExpanded by remember { mutableStateOf(false) }
+    var songsExpanded by remember { mutableStateOf(false) }
     var sortField by remember { mutableStateOf(SortField.TITLE) }
     var ascending by remember { mutableStateOf(true) }
     var menuExpanded by remember { mutableStateOf(false) }

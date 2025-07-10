@@ -133,6 +133,15 @@ class MusicService : Service() {
     fun nextSong() {
         if (songs.isEmpty()) return
 
+        val atEnd = currentIndex == songs.lastIndex
+
+        if (!isShuffling && repeatMode == 0 && atEnd) {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+            return
+        }
+
         mediaPlayer?.stop()
         mediaPlayer?.release()
 
@@ -144,10 +153,6 @@ class MusicService : Service() {
             }
         } else {
             (currentIndex + 1) % songs.size
-        }
-
-        if (repeatMode == 0 && currentIndex == 0 && !isShuffling) {
-            return
         }
 
         playSong(songs[currentIndex])
