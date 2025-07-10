@@ -226,6 +226,10 @@ class MusicService : Service() {
             .addAction(R.drawable.ic_notification_previous, "Prev", previousPending)
             .addAction(playIcon, if (mediaPlayer?.isPlaying == true) "Pause" else "Play", togglePending)
             .addAction(R.drawable.ic_notification_next, "Next", nextPending)
+            .setStyle(
+                androidx.media.app.NotificationCompat.MediaStyle()
+                    .setShowActionsInCompactView(1, 2, 3)
+            )
 
         startForeground(NOTIFICATION_ID, notificationBuilder.build())
     }
