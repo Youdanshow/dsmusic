@@ -157,8 +157,9 @@ fun MusicApp() {
         )
 
         Scaffold(
+            containerColor = Color.Transparent,
             bottomBar = {
-                NavigationBar {
+                NavigationBar(containerColor = Color.Transparent) {
                     BottomScreen.values().forEach { screen ->
                         NavigationBarItem(
                             selected = currentScreen == screen,
