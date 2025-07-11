@@ -277,8 +277,11 @@ fun MusicApp() {
                 )
             }
         }
+
     }
     }
+}
+
 }
 
 enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
