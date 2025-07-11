@@ -609,7 +609,11 @@ fun SearchScreen(
 @Composable
 fun PlaylistScreen() {
     val context = LocalContext.current
-    var playlists by remember { mutableStateOf(PlaylistManager.getAllPlaylists(context)) }
+    val playlists = remember {
+        mutableStateListOf<Playlist>().apply {
+            addAll(PlaylistManager.getAllPlaylists(context))
+        }
+    }
     var showDialog by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
 
@@ -630,10 +634,13 @@ fun PlaylistScreen() {
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val newPlaylist = Playlist(name, mutableListOf())
-                    PlaylistManager.addPlaylist(context, newPlaylist)
-                    playlists = PlaylistManager.getAllPlaylists(context)
-                    name = ""
+                    if (name.isNotBlank()) {
+                        val newPlaylist = Playlist(name, mutableListOf())
+                        PlaylistManager.addPlaylist(context, newPlaylist)
+                        playlists.clear()
+                        playlists.addAll(PlaylistManager.getAllPlaylists(context))
+                        name = ""
+                    }
                     showDialog = false
                 }) { Text("Créer", color = Color.White) }
             },
@@ -678,7 +685,8 @@ fun PlaylistScreen() {
                         confirmButton = {
                             TextButton(onClick = {
                                 PlaylistManager.renamePlaylist(context, playlist.name, newName)
-                                playlists = PlaylistManager.getAllPlaylists(context)
+                                playlists.clear()
+                                playlists.addAll(PlaylistManager.getAllPlaylists(context))
                                 renameDialog = false
                             }) { Text("OK", color = Color.White) }
                         },
@@ -695,7 +703,8 @@ fun PlaylistScreen() {
                         confirmButton = {
                             TextButton(onClick = {
                                 PlaylistManager.deletePlaylist(context, playlist.name)
-                                playlists = PlaylistManager.getAllPlaylists(context)
+                                playlists.clear()
+                                playlists.addAll(PlaylistManager.getAllPlaylists(context))
                                 deleteDialog = false
                             }) { Text("Supprimer", color = Color.White) }
                         },
