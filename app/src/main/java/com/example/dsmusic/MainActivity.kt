@@ -184,7 +184,13 @@ fun MusicApp() {
                 .fillMaxSize()) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     Box {
-                        Button(onClick = { themeMenuExpanded = true }) {
+                        Button(
+                            onClick = { themeMenuExpanded = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
                             Text("Choix du thème")
                         }
                         DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
