@@ -683,4 +683,3 @@ fun MiniPlayer(
         }
     }
 }
-}
