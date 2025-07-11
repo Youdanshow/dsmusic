@@ -188,7 +188,7 @@ fun MusicApp() {
                             onClick = { themeMenuExpanded = true },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent,
-                                contentColor = MaterialTheme.colorScheme.primary
+                                contentColor = Color.Black
                             )
                         ) {
                             Text("Choix du thème")
