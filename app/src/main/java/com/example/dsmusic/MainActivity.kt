@@ -57,7 +57,7 @@ import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
-import com.example.dsmusic.ui.theme.TextWhite
+import com.example.dsmusic.ui.theme.TextBlack
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
 import com.google.gson.Gson
@@ -629,8 +629,8 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
         containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else Color.Transparent,
-        headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
-        supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
+        headlineColor = if (isCurrent) TextBlack else MaterialTheme.colorScheme.onSurface,
+        supportingColor = if (isCurrent) TextBlack else MaterialTheme.colorScheme.onSurfaceVariant
     )
     ListItem(
         headlineContent = { Text(song.title) },

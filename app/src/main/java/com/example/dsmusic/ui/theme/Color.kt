@@ -6,3 +6,4 @@ import androidx.compose.ui.graphics.Color
 val AccentColorDefault = Color(0xFF6200EE)
 val BackgroundBlack = Color(0xFF000000)
 val TextWhite = Color(0xFFFFFFFF)
+val TextBlack = Color(0xFF000000)

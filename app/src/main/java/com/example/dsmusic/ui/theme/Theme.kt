@@ -10,10 +10,10 @@ fun DSMusicTheme(content: @Composable () -> Unit) {
         secondary = AccentColorDefault,
         background = BackgroundBlack,
         surface = BackgroundBlack,
-        onPrimary = TextWhite,
-        onSecondary = TextWhite,
-        onBackground = TextWhite,
-        onSurface = TextWhite
+        onPrimary = TextBlack,
+        onSecondary = TextBlack,
+        onBackground = TextBlack,
+        onSurface = TextBlack
     )
     MaterialTheme(
         colorScheme = colorScheme,
