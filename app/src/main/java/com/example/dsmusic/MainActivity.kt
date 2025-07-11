@@ -57,7 +57,6 @@ import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
-import com.example.dsmusic.ui.theme.AccentColorDefault
 import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
@@ -72,7 +71,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         requestAudioPermission()
         setContent {
-            MusicApp()
+            DSMusicTheme {
+                MusicApp()
+            }
         }
     }
 
@@ -111,12 +112,6 @@ fun MusicApp() {
         3 -> R.drawable.back_3
         else -> R.drawable.back_4
     }
-    val accentColor = when (selectedTheme) {
-        1 -> AccentColorDefault
-        2 -> Color(0xFF03DAC5)
-        3 -> Color(0xFFFF5722)
-        else -> Color(0xFF4CAF50)
-    }
     val connection = remember {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -154,7 +149,7 @@ fun MusicApp() {
         }
     }
 
-    DSMusicTheme(accentColor = accentColor) {
+    DSMusicTheme {
         Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(backgroundRes),
