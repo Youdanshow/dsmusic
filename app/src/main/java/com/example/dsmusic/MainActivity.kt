@@ -190,22 +190,22 @@ fun MusicApp() {
                             DropdownMenuItem(
                                 text = { Text("Thème 1") },
                                 onClick = { selectedTheme = 1; themeMenuExpanded = false },
-                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                                modifier = Modifier.background(Color.Transparent)
                             )
                             DropdownMenuItem(
                                 text = { Text("Thème 2") },
                                 onClick = { selectedTheme = 2; themeMenuExpanded = false },
-                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                                modifier = Modifier.background(Color.Transparent)
                             )
                             DropdownMenuItem(
                                 text = { Text("Thème 3") },
                                 onClick = { selectedTheme = 3; themeMenuExpanded = false },
-                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                                modifier = Modifier.background(Color.Transparent)
                             )
                             DropdownMenuItem(
                                 text = { Text("Thème 4") },
                                 onClick = { selectedTheme = 4; themeMenuExpanded = false },
-                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                                modifier = Modifier.background(Color.Transparent)
                             )
                         }
                     }
@@ -321,7 +321,7 @@ fun SongList(
                                     sortField = field
                                     menuExpanded = false
                                 },
-                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                                modifier = Modifier.background(Color.Transparent)
                             )
                         }
                         DropdownMenuItem(
@@ -330,7 +330,7 @@ fun SongList(
                                 ascending = true
                                 menuExpanded = false
                             },
-                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            modifier = Modifier.background(Color.Transparent)
                         )
                         DropdownMenuItem(
                             text = { Text("Ordre décroissant") },
@@ -338,7 +338,7 @@ fun SongList(
                                 ascending = false
                                 menuExpanded = false
                             },
-                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            modifier = Modifier.background(Color.Transparent)
                         )
                         DropdownMenuItem(
                             text = { Text("Réinitialiser") },
@@ -347,7 +347,7 @@ fun SongList(
                                 ascending = true
                                 menuExpanded = false
                             },
-                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            modifier = Modifier.background(Color.Transparent)
                         )
                     }
                 }
@@ -416,7 +416,7 @@ fun SearchScreen(
                                 sortField = field
                                 menuExpanded = false
                             },
-                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            modifier = Modifier.background(Color.Transparent)
                         )
                     }
                     DropdownMenuItem(
@@ -425,7 +425,7 @@ fun SearchScreen(
                             ascending = true
                             menuExpanded = false
                         },
-                        colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                        modifier = Modifier.background(Color.Transparent)
                     )
                     DropdownMenuItem(
                         text = { Text("Ordre décroissant") },
@@ -433,7 +433,7 @@ fun SearchScreen(
                             ascending = false
                             menuExpanded = false
                         },
-                        colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                        modifier = Modifier.background(Color.Transparent)
                     )
                     DropdownMenuItem(
                         text = { Text("Réinitialiser") },
@@ -442,7 +442,7 @@ fun SearchScreen(
                             ascending = true
                             menuExpanded = false
                         },
-                        colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                        modifier = Modifier.background(Color.Transparent)
                     )
                 }
             }
