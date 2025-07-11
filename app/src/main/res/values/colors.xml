@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="accent_pink">#FF007A</color>
+    <color name="accent_color">#6200EE</color>
     <color name="background_black">#000000</color>
     <color name="white">#FFFFFF</color>
 </resources>

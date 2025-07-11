@@ -57,7 +57,7 @@ import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
-import com.example.dsmusic.ui.theme.PinkAccent
+import com.example.dsmusic.ui.theme.AccentColorDefault
 import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
@@ -72,9 +72,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         requestAudioPermission()
         setContent {
-            DSMusicTheme {
-                MusicApp()
-            }
+            MusicApp()
         }
     }
 
@@ -113,6 +111,12 @@ fun MusicApp() {
         3 -> R.drawable.back_3
         else -> R.drawable.back_4
     }
+    val accentColor = when (selectedTheme) {
+        1 -> AccentColorDefault
+        2 -> Color(0xFF03DAC5)
+        3 -> Color(0xFFFF5722)
+        else -> Color(0xFF4CAF50)
+    }
     val connection = remember {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -150,7 +154,8 @@ fun MusicApp() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    DSMusicTheme(accentColor = accentColor) {
+        Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(backgroundRes),
             contentDescription = null,
@@ -615,7 +620,7 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 @Composable
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
-        containerColor = if (isCurrent) PinkAccent else Color.Transparent,
+        containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
         supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -688,7 +693,7 @@ fun MiniPlayer(
                     Text(song.artist, style = MaterialTheme.typography.bodySmall)
                 }
                 IconButton(onClick = onShuffle) {
-                    val tint = if (shuffleOn) PinkAccent else MaterialTheme.colorScheme.onSurface
+                    val tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle", tint = tint)
                 }
                 IconButton(onClick = onPrevious) {
@@ -707,7 +712,7 @@ fun MiniPlayer(
                         1 -> Icons.Filled.RepeatOne
                         else -> Icons.Filled.Repeat
                     }
-                    val tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else PinkAccent
+                    val tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
                     Icon(icon, contentDescription = "Repeat", tint = tint)
                 }
             }

@@ -1,25 +1,27 @@
 package com.example.dsmusic.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-
-private val ColorScheme = darkColorScheme(
-    primary = PinkAccent,
-    secondary = PinkAccent,
-    background = BackgroundBlack,
-    surface = BackgroundBlack,
-    onPrimary = TextWhite,
-    onSecondary = TextWhite,
-    onBackground = TextWhite,
-    onSurface = TextWhite
-)
+import androidx.compose.ui.graphics.Color
 
 @Composable
-fun DSMusicTheme(content: @Composable () -> Unit) {
+fun DSMusicTheme(
+    accentColor: Color = AccentColorDefault,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = darkColorScheme(
+        primary = accentColor,
+        secondary = accentColor,
+        background = BackgroundBlack,
+        surface = BackgroundBlack,
+        onPrimary = TextWhite,
+        onSecondary = TextWhite,
+        onBackground = TextWhite,
+        onSurface = TextWhite
+    )
     MaterialTheme(
-        colorScheme = ColorScheme,
+        colorScheme = colorScheme,
         typography = MaterialTheme.typography,
         content = content
     )
