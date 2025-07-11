@@ -37,6 +37,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.blur
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -99,6 +104,15 @@ fun MusicApp() {
     var shuffleOn by remember { mutableStateOf(false) }
     var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
+    val backgrounds = remember {
+        listOf(
+            R.drawable.back_1,
+            R.drawable.back_2,
+            R.drawable.back_3,
+            R.drawable.back_4,
+        )
+    }
+    val backgroundRes = remember { backgrounds.random() }
     val connection = remember {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -136,14 +150,24 @@ fun MusicApp() {
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                BottomScreen.values().forEach { screen ->
-                    NavigationBarItem(
-                        selected = currentScreen == screen,
-                        onClick = { currentScreen = screen },
-                        icon = {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(backgroundRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(20.dp)
+                .graphicsLayer(alpha = 0.5f)
+        )
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    BottomScreen.values().forEach { screen ->
+                        NavigationBarItem(
+                            selected = currentScreen == screen,
+                            onClick = { currentScreen = screen },
+                            icon = {
                             when (screen) {
                                 BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
                                 BottomScreen.Search -> Icon(Icons.Default.Search, contentDescription = null)
@@ -154,11 +178,12 @@ fun MusicApp() {
                     )
                 }
             }
-        }
-    ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
+                }
+            }
+        ) { innerPadding ->
+            Column(modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()) {
             Box(modifier = Modifier.weight(1f)) {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
