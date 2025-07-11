@@ -12,8 +12,8 @@ object PlaylistManager {
     fun getAllPlaylists(context: Context): MutableList<Playlist> {
         val file = File(context.filesDir, FILE_NAME)
         if (!file.exists()) return mutableListOf()
-        val json = file.readText()
         return try {
+            val json = file.readText()
             Gson().fromJson<MutableList<Playlist>?>(
                 json,
                 object : TypeToken<MutableList<Playlist>>() {}.type

@@ -611,7 +611,7 @@ fun PlaylistScreen() {
     val context = LocalContext.current
     val playlists = remember { mutableStateListOf<Playlist>() }
 
-    LaunchedEffect(context) {
+    LaunchedEffect(Unit) {
         playlists.clear()
         playlists.addAll(PlaylistManager.getAllPlaylists(context))
     }
