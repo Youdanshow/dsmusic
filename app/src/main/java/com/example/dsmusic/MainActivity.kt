@@ -27,6 +27,8 @@ import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
+import com.example.dsmusic.model.Playlist
+import com.example.dsmusic.utils.PlaylistManager
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -178,7 +180,7 @@ fun MusicApp() {
                             when (screen) {
                                 BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
                                 BottomScreen.Search -> Icon(Icons.Default.Search, contentDescription = null)
-                                BottomScreen.Library -> Icon(Icons.Default.LibraryMusic, contentDescription = null)
+                                BottomScreen.Playlist -> Icon(Icons.Default.LibraryMusic, contentDescription = null)
                             }
                         },
                         label = { Text(screen.label) }
@@ -207,13 +209,7 @@ fun MusicApp() {
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
-                    BottomScreen.Library -> SongList(songs, onSongClick = { song, index, list ->
-                        startPlayback(context, list, index)
-                        playlist = list
-                        currentIndex = index
-                        currentSong = song
-                        isPlaying = true
-                    }, currentSong = currentSong, onThemeSelected = { selectedTheme = it })
+                    BottomScreen.Playlist -> PlaylistScreen()
                 }
             }
             currentSong?.let { song ->
@@ -259,7 +255,7 @@ fun MusicApp() {
 
 }
 
-enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
+enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Playlist("Playlist") }
 
 enum class SortField(val label: String) {
     TITLE("Nom"),
@@ -603,6 +599,56 @@ fun SearchScreen(
                         isCurrent = song.uri == currentSong?.uri
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun PlaylistScreen() {
+    val context = LocalContext.current
+    var playlists by remember { mutableStateOf(PlaylistManager.getAllPlaylists(context)) }
+    var showDialog by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Nom de la playlist") },
+            text = {
+                TextField(value = name, onValueChange = { name = it })
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val newPlaylist = Playlist(name, mutableListOf())
+                    PlaylistManager.addPlaylist(context, newPlaylist)
+                    playlists = PlaylistManager.getAllPlaylists(context)
+                    name = ""
+                    showDialog = false
+                }) { Text("Créer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Annuler") }
+            }
+        )
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Button(
+            onClick = { showDialog = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text("Créer une playlist")
+        }
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(playlists) { playlist ->
+                ListItem(
+                    headlineContent = { Text(playlist.name) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+                HorizontalDivider()
             }
         }
     }
