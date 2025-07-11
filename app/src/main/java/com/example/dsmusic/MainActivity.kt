@@ -27,6 +27,7 @@ import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.MoreVert
 import com.example.dsmusic.model.Playlist
 import com.example.dsmusic.utils.PlaylistManager
 import androidx.compose.material.icons.filled.Search
@@ -653,9 +654,78 @@ fun PlaylistScreen() {
             Text("Créer une playlist")
         }
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(playlists) { playlist ->
+            items(playlists, key = { it.name }) { playlist ->
+                var menuExpanded by remember { mutableStateOf(false) }
+                var renameDialog by remember { mutableStateOf(false) }
+                var deleteDialog by remember { mutableStateOf(false) }
+                var newName by remember { mutableStateOf(playlist.name) }
+
+                if (renameDialog) {
+                    AlertDialog(
+                        onDismissRequest = { renameDialog = false },
+                        title = { Text("Renommer", color = Color.White) },
+                        text = {
+                            TextField(
+                                value = newName,
+                                onValueChange = { newName = it },
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    cursorColor = Color.White
+                                )
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                PlaylistManager.renamePlaylist(context, playlist.name, newName)
+                                playlists = PlaylistManager.getAllPlaylists(context)
+                                renameDialog = false
+                            }) { Text("OK", color = Color.White) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { renameDialog = false }) { Text("Annuler", color = Color.White) }
+                        }
+                    )
+                }
+
+                if (deleteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { deleteDialog = false },
+                        title = { Text("Supprimer la playlist ?", color = Color.White) },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                PlaylistManager.deletePlaylist(context, playlist.name)
+                                playlists = PlaylistManager.getAllPlaylists(context)
+                                deleteDialog = false
+                            }) { Text("Supprimer", color = Color.White) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { deleteDialog = false }) { Text("Annuler", color = Color.White) }
+                        }
+                    )
+                }
+
                 ListItem(
                     headlineContent = { Text(playlist.name) },
+                    trailingContent = {
+                        Box {
+                            IconButton(onClick = { menuExpanded = true }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "Options")
+                            }
+                            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                                DropdownMenuItem(
+                                    text = { Text("Renommer", color = Color.White) },
+                                    onClick = { renameDialog = true; menuExpanded = false },
+                                    modifier = Modifier.background(Color.Transparent)
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Supprimer", color = Color.White) },
+                                    onClick = { deleteDialog = true; menuExpanded = false },
+                                    modifier = Modifier.background(Color.Transparent)
+                                )
+                            }
+                        }
+                    },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
                 HorizontalDivider()
