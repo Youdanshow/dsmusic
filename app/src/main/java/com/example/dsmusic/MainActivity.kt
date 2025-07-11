@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
+import androidx.compose.material3.TextFieldDefaults
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
@@ -614,9 +615,17 @@ fun PlaylistScreen() {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Nom de la playlist") },
+            title = { Text("Nom de la playlist", color = Color.White) },
             text = {
-                TextField(value = name, onValueChange = { name = it })
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = Color.White
+                    )
+                )
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -625,10 +634,10 @@ fun PlaylistScreen() {
                     playlists = PlaylistManager.getAllPlaylists(context)
                     name = ""
                     showDialog = false
-                }) { Text("Créer") }
+                }) { Text("Créer", color = Color.White) }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Annuler") }
+                TextButton(onClick = { showDialog = false }) { Text("Annuler", color = Color.White) }
             }
         )
     }
