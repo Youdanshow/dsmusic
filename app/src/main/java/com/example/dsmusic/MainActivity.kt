@@ -52,6 +52,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
@@ -159,7 +161,10 @@ fun MusicApp() {
             painter = painterResource(backgroundRes),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(8.dp)
+                .alpha(0.7f)
         )
 
         Scaffold(
@@ -199,22 +204,22 @@ fun MusicApp() {
                         }
                         DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text("Thème 1") },
+                                text = { Text("Thème 1", color = Color.White) },
                                 onClick = { selectedTheme = 1; themeMenuExpanded = false },
                                 modifier = Modifier.background(Color.Transparent)
                             )
                             DropdownMenuItem(
-                                text = { Text("Thème 2") },
+                                text = { Text("Thème 2", color = Color.White) },
                                 onClick = { selectedTheme = 2; themeMenuExpanded = false },
                                 modifier = Modifier.background(Color.Transparent)
                             )
                             DropdownMenuItem(
-                                text = { Text("Thème 3") },
+                                text = { Text("Thème 3", color = Color.White) },
                                 onClick = { selectedTheme = 3; themeMenuExpanded = false },
                                 modifier = Modifier.background(Color.Transparent)
                             )
                             DropdownMenuItem(
-                                text = { Text("Thème 4") },
+                                text = { Text("Thème 4", color = Color.White) },
                                 onClick = { selectedTheme = 4; themeMenuExpanded = false },
                                 modifier = Modifier.background(Color.Transparent)
                             )
@@ -330,7 +335,7 @@ fun SongList(
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         SortField.values().forEach { field ->
                             DropdownMenuItem(
-                                text = { Text(field.label) },
+                                text = { Text(field.label, color = Color.White) },
                                 onClick = {
                                     sortField = field
                                     menuExpanded = false
@@ -339,7 +344,7 @@ fun SongList(
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("Ordre croissant") },
+                            text = { Text("Ordre croissant", color = Color.White) },
                             onClick = {
                                 ascending = true
                                 menuExpanded = false
@@ -347,7 +352,7 @@ fun SongList(
                             modifier = Modifier.background(Color.Transparent)
                         )
                         DropdownMenuItem(
-                            text = { Text("Ordre décroissant") },
+                            text = { Text("Ordre décroissant", color = Color.White) },
                             onClick = {
                                 ascending = false
                                 menuExpanded = false
@@ -355,7 +360,7 @@ fun SongList(
                             modifier = Modifier.background(Color.Transparent)
                         )
                         DropdownMenuItem(
-                            text = { Text("Réinitialiser") },
+                            text = { Text("Réinitialiser", color = Color.White) },
                             onClick = {
                                 sortField = SortField.TITLE
                                 ascending = true
@@ -425,7 +430,7 @@ fun SearchScreen(
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     SortField.values().forEach { field ->
                         DropdownMenuItem(
-                            text = { Text(field.label) },
+                            text = { Text(field.label, color = Color.White) },
                             onClick = {
                                 sortField = field
                                 menuExpanded = false
@@ -434,7 +439,7 @@ fun SearchScreen(
                         )
                     }
                     DropdownMenuItem(
-                        text = { Text("Ordre croissant") },
+                        text = { Text("Ordre croissant", color = Color.White) },
                         onClick = {
                             ascending = true
                             menuExpanded = false
@@ -442,7 +447,7 @@ fun SearchScreen(
                         modifier = Modifier.background(Color.Transparent)
                     )
                     DropdownMenuItem(
-                        text = { Text("Ordre décroissant") },
+                        text = { Text("Ordre décroissant", color = Color.White) },
                         onClick = {
                             ascending = false
                             menuExpanded = false
@@ -450,7 +455,7 @@ fun SearchScreen(
                         modifier = Modifier.background(Color.Transparent)
                     )
                     DropdownMenuItem(
-                        text = { Text("Réinitialiser") },
+                        text = { Text("Réinitialiser", color = Color.White) },
                         onClick = {
                             sortField = SortField.TITLE
                             ascending = true
