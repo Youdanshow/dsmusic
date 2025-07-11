@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -46,6 +47,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
@@ -99,6 +103,14 @@ fun MusicApp() {
     var shuffleOn by remember { mutableStateOf(false) }
     var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
+    var selectedTheme by rememberSaveable { mutableStateOf(1) }
+    var themeMenuExpanded by remember { mutableStateOf(false) }
+    val backgroundRes = when (selectedTheme) {
+        1 -> R.drawable.back_1
+        2 -> R.drawable.back_2
+        3 -> R.drawable.back_3
+        else -> R.drawable.back_4
+    }
     val connection = remember {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -136,12 +148,20 @@ fun MusicApp() {
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                BottomScreen.values().forEach { screen ->
-                    NavigationBarItem(
-                        selected = currentScreen == screen,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(backgroundRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
+
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    BottomScreen.values().forEach { screen ->
+                        NavigationBarItem(
+                            selected = currentScreen == screen,
                         onClick = { currentScreen = screen },
                         icon = {
                             when (screen) {
@@ -155,10 +175,23 @@ fun MusicApp() {
                 }
             }
         }
-    ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
+        ) { innerPadding ->
+            Column(modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    Box {
+                        Button(onClick = { themeMenuExpanded = true }) {
+                            Text("Choix du thème")
+                        }
+                        DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
+                            DropdownMenuItem(text = { Text("Thème 1") }, onClick = { selectedTheme = 1; themeMenuExpanded = false })
+                            DropdownMenuItem(text = { Text("Thème 2") }, onClick = { selectedTheme = 2; themeMenuExpanded = false })
+                            DropdownMenuItem(text = { Text("Thème 3") }, onClick = { selectedTheme = 3; themeMenuExpanded = false })
+                            DropdownMenuItem(text = { Text("Thème 4") }, onClick = { selectedTheme = 4; themeMenuExpanded = false })
+                        }
+                    }
+                }
             Box(modifier = Modifier.weight(1f)) {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
@@ -220,6 +253,7 @@ fun MusicApp() {
                 )
             }
         }
+    }
     }
 }
 
