@@ -92,6 +92,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+
+
 @Composable
 fun MusicApp() {
     val context = LocalContext.current
@@ -682,4 +685,5 @@ fun MiniPlayer(
             )
         }
     }
+}
 }
