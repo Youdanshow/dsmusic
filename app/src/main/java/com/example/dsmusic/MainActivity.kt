@@ -187,10 +187,26 @@ fun MusicApp() {
                             Text("Choix du thème")
                         }
                         DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
-                            DropdownMenuItem(text = { Text("Thème 1") }, onClick = { selectedTheme = 1; themeMenuExpanded = false })
-                            DropdownMenuItem(text = { Text("Thème 2") }, onClick = { selectedTheme = 2; themeMenuExpanded = false })
-                            DropdownMenuItem(text = { Text("Thème 3") }, onClick = { selectedTheme = 3; themeMenuExpanded = false })
-                            DropdownMenuItem(text = { Text("Thème 4") }, onClick = { selectedTheme = 4; themeMenuExpanded = false })
+                            DropdownMenuItem(
+                                text = { Text("Thème 1") },
+                                onClick = { selectedTheme = 1; themeMenuExpanded = false },
+                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Thème 2") },
+                                onClick = { selectedTheme = 2; themeMenuExpanded = false },
+                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Thème 3") },
+                                onClick = { selectedTheme = 3; themeMenuExpanded = false },
+                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Thème 4") },
+                                onClick = { selectedTheme = 4; themeMenuExpanded = false },
+                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
+                            )
                         }
                     }
                 }
@@ -304,7 +320,8 @@ fun SongList(
                                 onClick = {
                                     sortField = field
                                     menuExpanded = false
-                                }
+                                },
+                                colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                             )
                         }
                         DropdownMenuItem(
@@ -312,14 +329,16 @@ fun SongList(
                             onClick = {
                                 ascending = true
                                 menuExpanded = false
-                            }
+                            },
+                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                         )
                         DropdownMenuItem(
                             text = { Text("Ordre décroissant") },
                             onClick = {
                                 ascending = false
                                 menuExpanded = false
-                            }
+                            },
+                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                         )
                         DropdownMenuItem(
                             text = { Text("Réinitialiser") },
@@ -327,7 +346,8 @@ fun SongList(
                                 sortField = SortField.TITLE
                                 ascending = true
                                 menuExpanded = false
-                            }
+                            },
+                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                         )
                     }
                 }
@@ -395,7 +415,8 @@ fun SearchScreen(
                             onClick = {
                                 sortField = field
                                 menuExpanded = false
-                            }
+                            },
+                            colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                         )
                     }
                     DropdownMenuItem(
@@ -403,14 +424,16 @@ fun SearchScreen(
                         onClick = {
                             ascending = true
                             menuExpanded = false
-                        }
+                        },
+                        colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                     )
                     DropdownMenuItem(
                         text = { Text("Ordre décroissant") },
                         onClick = {
                             ascending = false
                             menuExpanded = false
-                        }
+                        },
+                        colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                     )
                     DropdownMenuItem(
                         text = { Text("Réinitialiser") },
@@ -418,7 +441,8 @@ fun SearchScreen(
                             sortField = SortField.TITLE
                             ascending = true
                             menuExpanded = false
-                        }
+                        },
+                        colors = MenuDefaults.itemColors(containerColor = Color.Transparent)
                     )
                 }
             }
@@ -446,6 +470,7 @@ fun SearchScreen(
                                     Icon(icon, contentDescription = null)
                                 }
                             },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { artistsExpanded = !artistsExpanded }
@@ -468,6 +493,7 @@ fun SearchScreen(
                                     Icon(icon, contentDescription = null)
                                 }
                             },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { albumsExpanded = !albumsExpanded }
@@ -489,6 +515,7 @@ fun SearchScreen(
                                 Icon(icon, contentDescription = null)
                             }
                         },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { songsExpanded = !songsExpanded }
@@ -560,8 +587,10 @@ fun SearchScreen(
 }
 @Composable
 fun AlbumItem(album: String, onClick: () -> Unit) {
+    val colors = ListItemDefaults.colors(containerColor = Color.Transparent)
     ListItem(
         headlineContent = { Text(album) },
+        colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -571,8 +600,10 @@ fun AlbumItem(album: String, onClick: () -> Unit) {
 
 @Composable
 fun ArtistItem(artist: String, onClick: () -> Unit) {
+    val colors = ListItemDefaults.colors(containerColor = Color.Transparent)
     ListItem(
         headlineContent = { Text(artist) },
+        colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -583,7 +614,7 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 @Composable
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
-        containerColor = if (isCurrent) PinkAccent else MaterialTheme.colorScheme.surface,
+        containerColor = if (isCurrent) PinkAccent else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
         supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -643,7 +674,7 @@ fun MiniPlayer(
         }
     }
 
-    Surface(shadowElevation = 4.dp) {
+    Surface(shadowElevation = 4.dp, color = Color.Transparent) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
