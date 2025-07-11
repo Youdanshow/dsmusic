@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
                     .launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
+
     }
 }
 
@@ -679,4 +680,5 @@ fun MiniPlayer(
             )
         }
     }
+}
 }
