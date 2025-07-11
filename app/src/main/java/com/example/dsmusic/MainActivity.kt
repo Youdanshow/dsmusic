@@ -52,6 +52,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
@@ -159,7 +161,10 @@ fun MusicApp() {
             painter = painterResource(backgroundRes),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(8.dp)
+                .alpha(0.7f)
         )
 
         Scaffold(
