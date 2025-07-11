@@ -42,8 +42,12 @@ import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.core.content.ContextCompat
@@ -135,30 +139,47 @@ fun MusicApp() {
             delay(500)
         }
     }
+    val backgroundPainter = remember {
+        listOf(
+            painterResource(R.drawable.back_1),
+            painterResource(R.drawable.back_2),
+            painterResource(R.drawable.back_3),
+            painterResource(R.drawable.back_4),
+        ).random()
+    }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                BottomScreen.values().forEach { screen ->
-                    NavigationBarItem(
-                        selected = currentScreen == screen,
-                        onClick = { currentScreen = screen },
-                        icon = {
-                            when (screen) {
-                                BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
-                                BottomScreen.Search -> Icon(Icons.Default.Search, contentDescription = null)
-                                BottomScreen.Library -> Icon(Icons.Default.LibraryMusic, contentDescription = null)
-                            }
-                        },
-                        label = { Text(screen.label) }
-                    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = backgroundPainter,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        Scaffold(
+            containerColor = Color.Transparent,
+            bottomBar = {
+                NavigationBar {
+                    BottomScreen.values().forEach { screen ->
+                        NavigationBarItem(
+                            selected = currentScreen == screen,
+                            onClick = { currentScreen = screen },
+                            icon = {
+                                when (screen) {
+                                    BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
+                                    BottomScreen.Search -> Icon(Icons.Default.Search, contentDescription = null)
+                                    BottomScreen.Library -> Icon(Icons.Default.LibraryMusic, contentDescription = null)
+                                }
+                            },
+                            label = { Text(screen.label) }
+                        )
+                    }
                 }
             }
-        }
-    ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
+        ) { innerPadding ->
+            Column(modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()) {
             Box(modifier = Modifier.weight(1f)) {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
