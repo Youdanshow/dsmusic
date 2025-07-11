@@ -57,7 +57,6 @@ import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
 import com.example.dsmusic.service.MusicService
 import com.example.dsmusic.ui.theme.DSMusicTheme
-import com.example.dsmusic.ui.theme.PinkAccent
 import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
@@ -66,10 +65,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.core.view.WindowCompat
+import android.graphics.Color as AndroidColor
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = AndroidColor.TRANSPARENT
         requestAudioPermission()
         setContent {
             DSMusicTheme {
@@ -150,7 +153,8 @@ fun MusicApp() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    DSMusicTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(backgroundRes),
             contentDescription = null,
@@ -184,7 +188,13 @@ fun MusicApp() {
                 .fillMaxSize()) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     Box {
-                        Button(onClick = { themeMenuExpanded = true }) {
+                        Button(
+                            onClick = { themeMenuExpanded = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.Black
+                            )
+                        ) {
                             Text("Choix du thème")
                         }
                         DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
@@ -272,8 +282,11 @@ fun MusicApp() {
                 )
             }
         }
+
     }
     }
+}
+
 }
 
 enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
@@ -615,7 +628,7 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 @Composable
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
-        containerColor = if (isCurrent) PinkAccent else Color.Transparent,
+        containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
         supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -688,7 +701,7 @@ fun MiniPlayer(
                     Text(song.artist, style = MaterialTheme.typography.bodySmall)
                 }
                 IconButton(onClick = onShuffle) {
-                    val tint = if (shuffleOn) PinkAccent else MaterialTheme.colorScheme.onSurface
+                    val tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle", tint = tint)
                 }
                 IconButton(onClick = onPrevious) {
@@ -707,7 +720,7 @@ fun MiniPlayer(
                         1 -> Icons.Filled.RepeatOne
                         else -> Icons.Filled.Repeat
                     }
-                    val tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else PinkAccent
+                    val tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
                     Icon(icon, contentDescription = "Repeat", tint = tint)
                 }
             }
