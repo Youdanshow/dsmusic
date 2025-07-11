@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -46,6 +48,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.example.dsmusic.model.Song
@@ -99,6 +105,14 @@ fun MusicApp() {
     var shuffleOn by remember { mutableStateOf(false) }
     var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
+    var selectedTheme by rememberSaveable { mutableStateOf(1) }
+    var themeMenuExpanded by remember { mutableStateOf(false) }
+    val backgroundRes = when (selectedTheme) {
+        1 -> R.drawable.back_1
+        2 -> R.drawable.back_2
+        3 -> R.drawable.back_3
+        else -> R.drawable.back_4
+    }
     val connection = remember {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -136,12 +150,21 @@ fun MusicApp() {
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                BottomScreen.values().forEach { screen ->
-                    NavigationBarItem(
-                        selected = currentScreen == screen,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(backgroundRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Scaffold(
+            containerColor = Color.Transparent,
+            bottomBar = {
+                NavigationBar(containerColor = Color.Transparent) {
+                    BottomScreen.values().forEach { screen ->
+                        NavigationBarItem(
+                            selected = currentScreen == screen,
                         onClick = { currentScreen = screen },
                         icon = {
                             when (screen) {
@@ -155,10 +178,39 @@ fun MusicApp() {
                 }
             }
         }
-    ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
+        ) { innerPadding ->
+            Column(modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    Box {
+                        Button(onClick = { themeMenuExpanded = true }) {
+                            Text("Choix du thème")
+                        }
+                        DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Thème 1") },
+                                onClick = { selectedTheme = 1; themeMenuExpanded = false },
+                                modifier = Modifier.background(Color.Transparent)
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Thème 2") },
+                                onClick = { selectedTheme = 2; themeMenuExpanded = false },
+                                modifier = Modifier.background(Color.Transparent)
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Thème 3") },
+                                onClick = { selectedTheme = 3; themeMenuExpanded = false },
+                                modifier = Modifier.background(Color.Transparent)
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Thème 4") },
+                                onClick = { selectedTheme = 4; themeMenuExpanded = false },
+                                modifier = Modifier.background(Color.Transparent)
+                            )
+                        }
+                    }
+                }
             Box(modifier = Modifier.weight(1f)) {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
@@ -221,6 +273,7 @@ fun MusicApp() {
             }
         }
     }
+    }
 }
 
 enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
@@ -268,7 +321,8 @@ fun SongList(
                                 onClick = {
                                     sortField = field
                                     menuExpanded = false
-                                }
+                                },
+                                modifier = Modifier.background(Color.Transparent)
                             )
                         }
                         DropdownMenuItem(
@@ -276,14 +330,16 @@ fun SongList(
                             onClick = {
                                 ascending = true
                                 menuExpanded = false
-                            }
+                            },
+                            modifier = Modifier.background(Color.Transparent)
                         )
                         DropdownMenuItem(
                             text = { Text("Ordre décroissant") },
                             onClick = {
                                 ascending = false
                                 menuExpanded = false
-                            }
+                            },
+                            modifier = Modifier.background(Color.Transparent)
                         )
                         DropdownMenuItem(
                             text = { Text("Réinitialiser") },
@@ -291,7 +347,8 @@ fun SongList(
                                 sortField = SortField.TITLE
                                 ascending = true
                                 menuExpanded = false
-                            }
+                            },
+                            modifier = Modifier.background(Color.Transparent)
                         )
                     }
                 }
@@ -359,7 +416,8 @@ fun SearchScreen(
                             onClick = {
                                 sortField = field
                                 menuExpanded = false
-                            }
+                            },
+                            modifier = Modifier.background(Color.Transparent)
                         )
                     }
                     DropdownMenuItem(
@@ -367,14 +425,16 @@ fun SearchScreen(
                         onClick = {
                             ascending = true
                             menuExpanded = false
-                        }
+                        },
+                        modifier = Modifier.background(Color.Transparent)
                     )
                     DropdownMenuItem(
                         text = { Text("Ordre décroissant") },
                         onClick = {
                             ascending = false
                             menuExpanded = false
-                        }
+                        },
+                        modifier = Modifier.background(Color.Transparent)
                     )
                     DropdownMenuItem(
                         text = { Text("Réinitialiser") },
@@ -382,7 +442,8 @@ fun SearchScreen(
                             sortField = SortField.TITLE
                             ascending = true
                             menuExpanded = false
-                        }
+                        },
+                        modifier = Modifier.background(Color.Transparent)
                     )
                 }
             }
@@ -410,6 +471,7 @@ fun SearchScreen(
                                     Icon(icon, contentDescription = null)
                                 }
                             },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { artistsExpanded = !artistsExpanded }
@@ -432,6 +494,7 @@ fun SearchScreen(
                                     Icon(icon, contentDescription = null)
                                 }
                             },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { albumsExpanded = !albumsExpanded }
@@ -453,6 +516,7 @@ fun SearchScreen(
                                 Icon(icon, contentDescription = null)
                             }
                         },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { songsExpanded = !songsExpanded }
@@ -524,8 +588,10 @@ fun SearchScreen(
 }
 @Composable
 fun AlbumItem(album: String, onClick: () -> Unit) {
+    val colors = ListItemDefaults.colors(containerColor = Color.Transparent)
     ListItem(
         headlineContent = { Text(album) },
+        colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -535,8 +601,10 @@ fun AlbumItem(album: String, onClick: () -> Unit) {
 
 @Composable
 fun ArtistItem(artist: String, onClick: () -> Unit) {
+    val colors = ListItemDefaults.colors(containerColor = Color.Transparent)
     ListItem(
         headlineContent = { Text(artist) },
+        colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -547,7 +615,7 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 @Composable
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
-        containerColor = if (isCurrent) PinkAccent else MaterialTheme.colorScheme.surface,
+        containerColor = if (isCurrent) PinkAccent else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
         supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -607,7 +675,7 @@ fun MiniPlayer(
         }
     }
 
-    Surface(shadowElevation = 4.dp) {
+    Surface(shadowElevation = 4.dp, color = Color.Transparent) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
