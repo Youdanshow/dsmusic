@@ -609,11 +609,15 @@ fun SearchScreen(
 @Composable
 fun PlaylistScreen() {
     val context = LocalContext.current
-    val playlists = remember { mutableStateListOf<Playlist>() }
+    val playlists = remember(context) { mutableStateListOf<Playlist>() }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(context) {
         playlists.clear()
-        playlists.addAll(PlaylistManager.getAllPlaylists(context))
+        try {
+            playlists.addAll(PlaylistManager.getAllPlaylists(context))
+        } catch (_: Exception) {
+            playlists.clear()
+        }
     }
     var showDialog by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
