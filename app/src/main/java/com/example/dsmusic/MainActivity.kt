@@ -178,9 +178,8 @@ fun MusicApp() {
                     )
                 }
             }
-                }
-            }
-        ) { innerPadding ->
+        }
+    ) { innerPadding ->
             Column(modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()) {
