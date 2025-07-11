@@ -13,7 +13,14 @@ object PlaylistManager {
         val file = File(context.filesDir, FILE_NAME)
         if (!file.exists()) return mutableListOf()
         val json = file.readText()
-        return Gson().fromJson(json, object : TypeToken<MutableList<Playlist>>() {}.type)
+        return try {
+            Gson().fromJson<MutableList<Playlist>?>(
+                json,
+                object : TypeToken<MutableList<Playlist>>() {}.type
+            ) ?: mutableListOf()
+        } catch (e: Exception) {
+            mutableListOf()
+        }
     }
 
     fun savePlaylists(context: Context, playlists: List<Playlist>) {
