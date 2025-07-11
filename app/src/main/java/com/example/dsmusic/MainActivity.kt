@@ -111,7 +111,6 @@ fun MusicApp() {
     var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
     var selectedTheme by rememberSaveable { mutableStateOf(1) }
-    var themeMenuExpanded by remember { mutableStateOf(false) }
     val backgroundRes = when (selectedTheme) {
         1 -> R.drawable.back_1
         2 -> R.drawable.back_2
@@ -191,41 +190,7 @@ fun MusicApp() {
             Column(modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    Box {
-                        Button(
-                            onClick = { themeMenuExpanded = true },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text("Choix du thème")
-                        }
-                        DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Thème 1", color = Color.White) },
-                                onClick = { selectedTheme = 1; themeMenuExpanded = false },
-                                modifier = Modifier.background(Color.Transparent)
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Thème 2", color = Color.White) },
-                                onClick = { selectedTheme = 2; themeMenuExpanded = false },
-                                modifier = Modifier.background(Color.Transparent)
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Thème 3", color = Color.White) },
-                                onClick = { selectedTheme = 3; themeMenuExpanded = false },
-                                modifier = Modifier.background(Color.Transparent)
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Thème 4", color = Color.White) },
-                                onClick = { selectedTheme = 4; themeMenuExpanded = false },
-                                modifier = Modifier.background(Color.Transparent)
-                            )
-                        }
-                    }
-                }
+
             Box(modifier = Modifier.weight(1f)) {
                 when (currentScreen) {
                     BottomScreen.Home -> SongList(songs, onSongClick = { song, index, list ->
@@ -234,7 +199,7 @@ fun MusicApp() {
                         currentIndex = index
                         currentSong = song
                         isPlaying = true
-                    }, currentSong = currentSong, showFilter = true)
+                    }, currentSong = currentSong, showFilter = true, onThemeSelected = { selectedTheme = it })
                     BottomScreen.Search -> SearchScreen(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         playlist = list
@@ -248,7 +213,7 @@ fun MusicApp() {
                         currentIndex = index
                         currentSong = song
                         isPlaying = true
-                    }, currentSong = currentSong)
+                    }, currentSong = currentSong, onThemeSelected = { selectedTheme = it })
                 }
             }
             currentSong?.let { song ->
@@ -309,6 +274,7 @@ fun SongList(
     onSongClick: (Song, Int, List<Song>) -> Unit,
     currentSong: Song?,
     showFilter: Boolean = false,
+    onThemeSelected: (Int) -> Unit = {}
 ) {
     var sortField by remember { mutableStateOf(SortField.TITLE) }
     var ascending by remember { mutableStateOf(true) }
@@ -327,7 +293,44 @@ fun SongList(
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (showFilter) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Box {
+                    var themeMenuExpanded by remember { mutableStateOf(false) }
+                    Button(
+                        onClick = { themeMenuExpanded = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("Choix du thème")
+                    }
+                    DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Thème 1", color = Color.White) },
+                            onClick = { onThemeSelected(1); themeMenuExpanded = false },
+                            modifier = Modifier.background(Color.Transparent)
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Thème 2", color = Color.White) },
+                            onClick = { onThemeSelected(2); themeMenuExpanded = false },
+                            modifier = Modifier.background(Color.Transparent)
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Thème 3", color = Color.White) },
+                            onClick = { onThemeSelected(3); themeMenuExpanded = false },
+                            modifier = Modifier.background(Color.Transparent)
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Thème 4", color = Color.White) },
+                            onClick = { onThemeSelected(4); themeMenuExpanded = false },
+                            modifier = Modifier.background(Color.Transparent)
+                        )
+                    }
+                }
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
