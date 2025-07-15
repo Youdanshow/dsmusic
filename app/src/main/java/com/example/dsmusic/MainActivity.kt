@@ -62,6 +62,7 @@ import com.example.dsmusic.ui.theme.DSMusicTheme
 import com.example.dsmusic.ui.theme.TextBlack
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
+import com.example.dsmusic.utils.ThemePreference
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.ImeAction
@@ -110,7 +111,7 @@ fun MusicApp() {
     var shuffleOn by remember { mutableStateOf(false) }
     var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
-    var selectedTheme by rememberSaveable { mutableStateOf(1) }
+    var selectedTheme by rememberSaveable { mutableStateOf(ThemePreference.loadTheme(context)) }
     val backgroundRes = when (selectedTheme) {
         1 -> R.drawable.back_1
         2 -> R.drawable.back_2
@@ -199,7 +200,10 @@ fun MusicApp() {
                         currentIndex = index
                         currentSong = song
                         isPlaying = true
-                    }, currentSong = currentSong, showFilter = true, onThemeSelected = { selectedTheme = it })
+                    }, currentSong = currentSong, showFilter = true, onThemeSelected = { theme ->
+                        selectedTheme = theme
+                        ThemePreference.saveTheme(context, theme)
+                    })
                     BottomScreen.Search -> SearchScreen(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         playlist = list
@@ -213,7 +217,10 @@ fun MusicApp() {
                         currentIndex = index
                         currentSong = song
                         isPlaying = true
-                    }, currentSong = currentSong, onThemeSelected = { selectedTheme = it })
+                    }, currentSong = currentSong, onThemeSelected = { theme ->
+                        selectedTheme = theme
+                        ThemePreference.saveTheme(context, theme)
+                    })
                 }
             }
             currentSong?.let { song ->
