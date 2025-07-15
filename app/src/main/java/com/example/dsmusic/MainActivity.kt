@@ -72,6 +72,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.core.view.WindowCompat
+import android.widget.Toast
 import android.graphics.Color as AndroidColor
 
 class MainActivity : ComponentActivity() {
@@ -792,19 +793,45 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 
 @Composable
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
+    val context = LocalContext.current
+    var menuExpanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
     val colors = ListItemDefaults.colors(
         containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
         supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
     )
+
     ListItem(
         headlineContent = { Text(song.title) },
         supportingContent = { Text(song.artist) },
+        trailingContent = {
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = null)
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.add_to_playlist)) },
+                        onClick = {
+                            menuExpanded = false
+                            showDialog = true
+                        }
+                    )
+                }
+            }
+        },
         colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
     )
+
+    if (showDialog) {
+        AddToPlaylistDialog(song = song, onDismiss = { showDialog = false })
+    }
+
     HorizontalDivider()
 }
 
@@ -822,6 +849,42 @@ fun togglePlayback(context: android.content.Context) {
         action = MusicService.ACTION_TOGGLE_PLAY
     }
     ContextCompat.startForegroundService(context, intent)
+}
+
+@Composable
+fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val playlists = remember { PlaylistManager.getAllPlaylists(context) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        },
+        title = { Text(stringResource(R.string.add_to_playlist)) },
+        text = {
+            if (playlists.isEmpty()) {
+                Text("Aucune playlist")
+            } else {
+                Column {
+                    playlists.forEach { playlist ->
+                        TextButton(
+                            onClick = {
+                                playlist.songs.add(song)
+                                PlaylistManager.updatePlaylist(context, playlist)
+                                Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                onDismiss()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(playlist.name)
+                        }
+                    }
+                }
+            }
+        }
+    )
 }
 
 @Composable
