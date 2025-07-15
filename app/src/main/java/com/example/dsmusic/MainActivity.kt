@@ -486,7 +486,7 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            placeholder = { Text("Rechercher") },
+            placeholder = { Text("Rechercher", color = Color.White) },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
@@ -817,7 +817,7 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     val colors = ListItemDefaults.colors(
         containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
-        supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
+        supportingColor = TextWhite
     )
 
     ListItem(
