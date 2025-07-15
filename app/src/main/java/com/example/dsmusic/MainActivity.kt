@@ -630,6 +630,7 @@ fun PlaylistScreen() {
     var renameTarget by remember { mutableStateOf<String?>(null) }
     var renameText by remember { mutableStateOf("") }
     var deleteTarget by remember { mutableStateOf<String?>(null) }
+    var songsFor by remember { mutableStateOf<Playlist?>(null) }
 
     LaunchedEffect(renameTarget) {
         renameText = renameTarget ?: ""
@@ -687,7 +688,9 @@ fun PlaylistScreen() {
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { songsFor = playlist }
                 )
                 HorizontalDivider()
             }
@@ -763,6 +766,28 @@ fun PlaylistScreen() {
             },
             title = { Text("Supprimer \"$name\" ?") },
             text = { Text("Cette action est définitive.") }
+        )
+    }
+
+    songsFor?.let { playlist ->
+        AlertDialog(
+            onDismissRequest = { songsFor = null },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { songsFor = null }) { Text("Fermer") }
+            },
+            title = { Text(playlist.name) },
+            text = {
+                if (playlist.songs.isEmpty()) {
+                    Text("Aucune musique")
+                } else {
+                    Column {
+                        playlist.songs.forEach { song ->
+                            Text(text = song.title)
+                        }
+                    }
+                }
+            }
         )
     }
 }
