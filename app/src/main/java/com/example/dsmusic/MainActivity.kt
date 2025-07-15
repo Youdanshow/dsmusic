@@ -164,7 +164,7 @@ fun MusicApp() {
             modifier = Modifier
                 .fillMaxSize()
                 .blur(8.dp)
-                .alpha(0.7f)
+                .alpha(0.6f)
         )
 
         Scaffold(
