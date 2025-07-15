@@ -26,7 +26,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -179,7 +179,7 @@ fun MusicApp() {
                             when (screen) {
                                 BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
                                 BottomScreen.Search -> Icon(Icons.Default.Search, contentDescription = null)
-                                BottomScreen.Library -> Icon(Icons.Default.LibraryMusic, contentDescription = null)
+                                BottomScreen.Playlist -> Icon(Icons.Default.PlaylistPlay, contentDescription = null)
                             }
                         },
                         label = { Text(screen.label) }
@@ -211,7 +211,7 @@ fun MusicApp() {
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
-                    BottomScreen.Library -> SongList(songs, onSongClick = { song, index, list ->
+                    BottomScreen.Playlist -> SongList(songs, onSongClick = { song, index, list ->
                         startPlayback(context, list, index)
                         playlist = list
                         currentIndex = index
@@ -266,7 +266,7 @@ fun MusicApp() {
 
 }
 
-enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
+enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Playlist("Playlists") }
 
 enum class SortField(val label: String) {
     TITLE("Nom"),
