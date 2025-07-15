@@ -26,7 +26,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -63,6 +64,8 @@ import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
 import com.example.dsmusic.utils.ThemePreference
+import com.example.dsmusic.utils.PlaylistManager
+import com.example.dsmusic.model.Playlist
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.ImeAction
@@ -179,7 +182,7 @@ fun MusicApp() {
                             when (screen) {
                                 BottomScreen.Home -> Icon(Icons.Default.Home, contentDescription = null)
                                 BottomScreen.Search -> Icon(Icons.Default.Search, contentDescription = null)
-                                BottomScreen.Library -> Icon(Icons.Default.LibraryMusic, contentDescription = null)
+                                BottomScreen.Playlist -> Icon(Icons.Default.PlaylistPlay, contentDescription = null)
                             }
                         },
                         label = { Text(screen.label) }
@@ -211,16 +214,7 @@ fun MusicApp() {
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
-                    BottomScreen.Library -> SongList(songs, onSongClick = { song, index, list ->
-                        startPlayback(context, list, index)
-                        playlist = list
-                        currentIndex = index
-                        currentSong = song
-                        isPlaying = true
-                    }, currentSong = currentSong, onThemeSelected = { theme ->
-                        selectedTheme = theme
-                        ThemePreference.saveTheme(context, theme)
-                    })
+                    BottomScreen.Playlist -> PlaylistScreen()
                 }
             }
             currentSong?.let { song ->
@@ -266,7 +260,7 @@ fun MusicApp() {
 
 }
 
-enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Library("Bibliothèque") }
+enum class BottomScreen(val label: String) { Home("Accueil"), Search("Recherche"), Playlist("Playlists") }
 
 enum class SortField(val label: String) {
     TITLE("Nom"),
@@ -620,6 +614,154 @@ fun SearchScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PlaylistScreen() {
+    val context = LocalContext.current
+    var playlists by remember { mutableStateOf(PlaylistManager.getAllPlaylists(context)) }
+    var dialogOpen by remember { mutableStateOf(false) }
+    var newName by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    var menuFor by remember { mutableStateOf<String?>(null) }
+    var renameTarget by remember { mutableStateOf<String?>(null) }
+    var renameText by remember { mutableStateOf("") }
+    var deleteTarget by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(renameTarget) {
+        renameText = renameTarget ?: ""
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Button(
+            onClick = { dialogOpen = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Créer une playlist")
+        }
+
+        ListItem(
+            headlineContent = { Text("Playlists") },
+            trailingContent = {
+                IconButton(onClick = { expanded = !expanded }) {
+                    val icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
+                    Icon(icon, contentDescription = null)
+                }
+            },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+        )
+        HorizontalDivider()
+        if (expanded) {
+            playlists.forEach { playlist ->
+                ListItem(
+                    headlineContent = { Text(playlist.name) },
+                    trailingContent = {
+                        Box {
+                            IconButton(onClick = { menuFor = playlist.name }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = null)
+                            }
+                            DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
+                                DropdownMenuItem(
+                                    text = { Text("Renommer") },
+                                    onClick = {
+                                        renameTarget = playlist.name
+                                        menuFor = null
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Supprimer") },
+                                    onClick = {
+                                        deleteTarget = playlist.name
+                                        menuFor = null
+                                    }
+                                )
+                            }
+                        }
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                HorizontalDivider()
+            }
+        }
+    }
+
+    if (dialogOpen) {
+        AlertDialog(
+            onDismissRequest = { dialogOpen = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val trimmed = newName.trim()
+                    if (trimmed.isNotEmpty()) {
+                        val playlist = Playlist(trimmed, mutableListOf())
+                        PlaylistManager.addPlaylist(context, playlist)
+                        playlists = PlaylistManager.getAllPlaylists(context)
+                        newName = ""
+                        dialogOpen = false
+                    }
+                }) { Text("Créer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { dialogOpen = false }) { Text("Annuler") }
+            },
+            title = { Text("Nom de la playlist") },
+            text = {
+                TextField(
+                    value = newName,
+                    onValueChange = { if (it.length <= 20) newName = it }
+                )
+            }
+        )
+    }
+
+    renameTarget?.let { name ->
+        AlertDialog(
+            onDismissRequest = { renameTarget = null },
+            confirmButton = {
+                TextButton(onClick = {
+                    val trimmed = renameText.trim()
+                    if (trimmed.isNotEmpty()) {
+                        PlaylistManager.renamePlaylist(context, name, trimmed)
+                        playlists = PlaylistManager.getAllPlaylists(context)
+                        renameTarget = null
+                    }
+                }) { Text("Renommer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { renameTarget = null }) { Text("Annuler") }
+            },
+            title = { Text("Renommer la playlist") },
+            text = {
+                TextField(
+                    value = renameText,
+                    onValueChange = { if (it.length <= 20) renameText = it }
+                )
+            }
+        )
+    }
+
+    deleteTarget?.let { name ->
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            confirmButton = {
+                TextButton(onClick = {
+                    PlaylistManager.removePlaylist(context, name)
+                    playlists = PlaylistManager.getAllPlaylists(context)
+                    deleteTarget = null
+                }) { Text("Supprimer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) { Text("Annuler") }
+            },
+            title = { Text("Supprimer \"$name\" ?") },
+            text = { Text("Cette action est définitive.") }
+        )
     }
 }
 @Composable
