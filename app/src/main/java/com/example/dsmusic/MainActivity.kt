@@ -340,7 +340,11 @@ fun SongList(
                 }
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
+                    Icon(
+                        Icons.Default.FilterList,
+                        contentDescription = "Filtrer",
+                        tint = Color.White
+                    )
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         SortField.values().forEach { field ->
@@ -435,7 +439,11 @@ fun SearchScreen(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.FilterList, contentDescription = "Filtrer")
+                    Icon(
+                        Icons.Default.FilterList,
+                        contentDescription = "Filtrer",
+                        tint = Color.White
+                    )
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     SortField.values().forEach { field ->
