@@ -625,7 +625,7 @@ fun PlaylistScreen() {
     var playlists by remember { mutableStateOf(PlaylistManager.getAllPlaylists(context)) }
     var dialogOpen by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
     var menuFor by remember { mutableStateOf<String?>(null) }
     var renameTarget by remember { mutableStateOf<String?>(null) }
     var renameText by remember { mutableStateOf("") }
