@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
@@ -623,6 +624,14 @@ fun PlaylistScreen() {
     var dialogOpen by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    var menuFor by remember { mutableStateOf<String?>(null) }
+    var renameTarget by remember { mutableStateOf<String?>(null) }
+    var renameText by remember { mutableStateOf("") }
+    var deleteTarget by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(renameTarget) {
+        renameText = renameTarget ?: ""
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Button(
@@ -652,6 +661,29 @@ fun PlaylistScreen() {
             playlists.forEach { playlist ->
                 ListItem(
                     headlineContent = { Text(playlist.name) },
+                    trailingContent = {
+                        Box {
+                            IconButton(onClick = { menuFor = playlist.name }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = null)
+                            }
+                            DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
+                                DropdownMenuItem(
+                                    text = { Text("Renommer") },
+                                    onClick = {
+                                        renameTarget = playlist.name
+                                        menuFor = null
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Supprimer") },
+                                    onClick = {
+                                        deleteTarget = playlist.name
+                                        menuFor = null
+                                    }
+                                )
+                            }
+                        }
+                    },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -680,8 +712,55 @@ fun PlaylistScreen() {
             },
             title = { Text("Nom de la playlist") },
             text = {
-                TextField(value = newName, onValueChange = { newName = it })
+                TextField(
+                    value = newName,
+                    onValueChange = { if (it.length <= 20) newName = it }
+                )
             }
+        )
+    }
+
+    renameTarget?.let { name ->
+        AlertDialog(
+            onDismissRequest = { renameTarget = null },
+            confirmButton = {
+                TextButton(onClick = {
+                    val trimmed = renameText.trim()
+                    if (trimmed.isNotEmpty()) {
+                        PlaylistManager.renamePlaylist(context, name, trimmed)
+                        playlists = PlaylistManager.getAllPlaylists(context)
+                        renameTarget = null
+                    }
+                }) { Text("Renommer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { renameTarget = null }) { Text("Annuler") }
+            },
+            title = { Text("Renommer la playlist") },
+            text = {
+                TextField(
+                    value = renameText,
+                    onValueChange = { if (it.length <= 20) renameText = it }
+                )
+            }
+        )
+    }
+
+    deleteTarget?.let { name ->
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            confirmButton = {
+                TextButton(onClick = {
+                    PlaylistManager.removePlaylist(context, name)
+                    playlists = PlaylistManager.getAllPlaylists(context)
+                    deleteTarget = null
+                }) { Text("Supprimer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) { Text("Annuler") }
+            },
+            title = { Text("Supprimer \"$name\" ?") },
+            text = { Text("Cette action est définitive.") }
         )
     }
 }

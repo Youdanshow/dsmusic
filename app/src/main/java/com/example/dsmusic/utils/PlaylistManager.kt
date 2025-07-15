@@ -33,4 +33,16 @@ object PlaylistManager {
         }
         savePlaylists(context, all)
     }
+
+    fun renamePlaylist(context: Context, oldName: String, newName: String) {
+        val all = getAllPlaylists(context).map {
+            if (it.name == oldName) Playlist(newName, it.songs) else it
+        }
+        savePlaylists(context, all)
+    }
+
+    fun removePlaylist(context: Context, name: String) {
+        val all = getAllPlaylists(context).filter { it.name != name }
+        savePlaylists(context, all)
+    }
 }
