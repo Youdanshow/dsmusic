@@ -770,23 +770,14 @@ fun PlaylistScreen() {
     }
 
     songsFor?.let { playlist ->
-        AlertDialog(
-            onDismissRequest = { songsFor = null },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { songsFor = null }) { Text("Fermer") }
+        PlaylistSongsScreen(
+            playlist = playlist,
+            onBack = {
+                playlists = PlaylistManager.getAllPlaylists(context)
+                songsFor = null
             },
-            title = { Text(playlist.name) },
-            text = {
-                if (playlist.songs.isEmpty()) {
-                    Text("Aucune musique")
-                } else {
-                    Column {
-                        playlist.songs.forEach { song ->
-                            Text(text = song.title)
-                        }
-                    }
-                }
+            onUpdate = {
+                playlists = PlaylistManager.getAllPlaylists(context)
             }
         )
     }
@@ -911,6 +902,76 @@ fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        headlineContent = { Text(song.title) },
+        supportingContent = { Text(song.artist) },
+        trailingContent = {
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = null)
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.remove_from_playlist)) },
+                        onClick = {
+                            menuExpanded = false
+                            onRemove()
+                        }
+                    )
+                }
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    )
+    HorizontalDivider()
+}
+
+@Composable
+fun PlaylistSongsScreen(
+    playlist: Playlist,
+    onBack: () -> Unit,
+    onUpdate: () -> Unit
+) {
+    val context = LocalContext.current
+    var songs by remember { mutableStateOf(playlist.songs.toMutableList()) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = null)
+            }
+            Text(playlist.name, style = MaterialTheme.typography.titleLarge)
+        }
+        if (songs.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Aucune musique")
+            }
+        } else {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                itemsIndexed(songs) { index, song ->
+                    PlaylistSongItem(
+                        song = song,
+                        onClick = { startPlayback(context, songs, index) },
+                        onRemove = {
+                            val updated = songs.toMutableList()
+                            updated.remove(song)
+                            songs = updated
+                            PlaylistManager.updatePlaylist(context, playlist.copy(songs = updated))
+                            onUpdate()
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
