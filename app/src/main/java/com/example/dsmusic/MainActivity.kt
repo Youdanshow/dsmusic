@@ -63,6 +63,8 @@ import com.example.dsmusic.ui.theme.TextWhite
 import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
 import com.example.dsmusic.utils.ThemePreference
+import com.example.dsmusic.utils.PlaylistManager
+import com.example.dsmusic.model.Playlist
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.ImeAction
@@ -211,16 +213,7 @@ fun MusicApp() {
                         currentSong = song
                         isPlaying = true
                     }, currentSong = currentSong)
-                    BottomScreen.Playlist -> SongList(songs, onSongClick = { song, index, list ->
-                        startPlayback(context, list, index)
-                        playlist = list
-                        currentIndex = index
-                        currentSong = song
-                        isPlaying = true
-                    }, currentSong = currentSong, onThemeSelected = { theme ->
-                        selectedTheme = theme
-                        ThemePreference.saveTheme(context, theme)
-                    })
+                    BottomScreen.Playlist -> PlaylistScreen()
                 }
             }
             currentSong?.let { song ->
@@ -620,6 +613,76 @@ fun SearchScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PlaylistScreen() {
+    val context = LocalContext.current
+    var playlists by remember { mutableStateOf(PlaylistManager.getAllPlaylists(context)) }
+    var dialogOpen by remember { mutableStateOf(false) }
+    var newName by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Button(
+            onClick = { dialogOpen = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Créer une playlist")
+        }
+
+        ListItem(
+            headlineContent = { Text("Playlists") },
+            trailingContent = {
+                IconButton(onClick = { expanded = !expanded }) {
+                    val icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
+                    Icon(icon, contentDescription = null)
+                }
+            },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+        )
+        HorizontalDivider()
+        if (expanded) {
+            playlists.forEach { playlist ->
+                ListItem(
+                    headlineContent = { Text(playlist.name) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                HorizontalDivider()
+            }
+        }
+    }
+
+    if (dialogOpen) {
+        AlertDialog(
+            onDismissRequest = { dialogOpen = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val trimmed = newName.trim()
+                    if (trimmed.isNotEmpty()) {
+                        val playlist = Playlist(trimmed, mutableListOf())
+                        PlaylistManager.addPlaylist(context, playlist)
+                        playlists = PlaylistManager.getAllPlaylists(context)
+                        newName = ""
+                        dialogOpen = false
+                    }
+                }) { Text("Créer") }
+            },
+            dismissButton = {
+                TextButton(onClick = { dialogOpen = false }) { Text("Annuler") }
+            },
+            title = { Text("Nom de la playlist") },
+            text = {
+                TextField(value = newName, onValueChange = { newName = it })
+            }
+        )
     }
 }
 @Composable
