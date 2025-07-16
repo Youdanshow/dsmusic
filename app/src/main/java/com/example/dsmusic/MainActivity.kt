@@ -500,7 +500,7 @@ fun SearchScreen(
                             trailingContent = {
                                 IconButton(onClick = { artistsExpanded = !artistsExpanded }) {
                                     val icon = if (artistsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                                    Icon(icon, contentDescription = null)
+                                    Icon(icon, contentDescription = null, tint = Color.White)
                                 }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -523,7 +523,7 @@ fun SearchScreen(
                             trailingContent = {
                                 IconButton(onClick = { albumsExpanded = !albumsExpanded }) {
                                     val icon = if (albumsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                                    Icon(icon, contentDescription = null)
+                                    Icon(icon, contentDescription = null, tint = Color.White)
                                 }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -545,7 +545,7 @@ fun SearchScreen(
                         trailingContent = {
                             IconButton(onClick = { songsExpanded = !songsExpanded }) {
                                 val icon = if (songsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                                Icon(icon, contentDescription = null)
+                                Icon(icon, contentDescription = null, tint = Color.White)
                             }
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -568,7 +568,7 @@ fun SearchScreen(
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         IconButton(onClick = { selectedArtist = null }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                         }
                         Text(text = selectedArtist ?: "")
                     }
@@ -593,7 +593,7 @@ fun SearchScreen(
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         IconButton(onClick = { selectedAlbum = null }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                         }
                         Text(text = selectedAlbum ?: "")
                     }
@@ -651,7 +651,7 @@ fun PlaylistScreen() {
             trailingContent = {
                 IconButton(onClick = { expanded = !expanded }) {
                     val icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                    Icon(icon, contentDescription = null)
+                    Icon(icon, contentDescription = null, tint = Color.White)
                 }
             },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -667,7 +667,7 @@ fun PlaylistScreen() {
                     trailingContent = {
                         Box {
                             IconButton(onClick = { menuFor = playlist.name }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = null)
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
                             }
                             DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
                                 DropdownMenuItem(
@@ -826,7 +826,7 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
         trailingContent = {
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = null)
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(
@@ -914,7 +914,7 @@ fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
         trailingContent = {
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = null)
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(
@@ -946,7 +946,7 @@ fun PlaylistSongsScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = null)
+                Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
             }
             Text(playlist.name, style = MaterialTheme.typography.titleLarge)
         }
@@ -1020,15 +1020,15 @@ fun MiniPlayer(
                     Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle", tint = tint)
                 }
                 IconButton(onClick = onPrevious) {
-                    Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous")
+                    Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", tint = Color.White)
                 }
                 IconButton(onClick = onToggle) {
                     val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
                     val desc = if (isPlaying) "Pause" else "Play"
-                    Icon(icon, contentDescription = desc)
+                    Icon(icon, contentDescription = desc, tint = Color.White)
                 }
                 IconButton(onClick = onNext) {
-                    Icon(Icons.Filled.SkipNext, contentDescription = "Next")
+                    Icon(Icons.Filled.SkipNext, contentDescription = "Next", tint = Color.White)
                 }
                 IconButton(onClick = onRepeat) {
                     val icon = when (repeatMode) {
