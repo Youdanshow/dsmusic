@@ -40,9 +40,13 @@ class SongAdapter(
                 .setTitle(context.getString(R.string.add_to_playlist))
                 .setItems(names) { _, which ->
                     val playlist = playlists[which]
-                    playlist.songs.add(song)
-                    PlaylistManager.updatePlaylist(context, playlist)
-                    Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                    if (!playlist.songs.contains(song)) {
+                        playlist.songs.add(song)
+                        PlaylistManager.updatePlaylist(context, playlist)
+                        Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.song_already_in_playlist), Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .show()
             true
