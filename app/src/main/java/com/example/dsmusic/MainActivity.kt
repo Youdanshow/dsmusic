@@ -1053,7 +1053,7 @@ fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
                                 } else {
                                     Toast.makeText(
                                         context,
-                                        stringResource(R.string.song_already_in_playlist),
+                                        context.getString(R.string.song_already_in_playlist),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -1097,8 +1097,8 @@ fun AddSongsToPlaylistDialog(songs: List<Song>, onDismiss: () -> Unit) {
                         TextButton(
                             onClick = {
                                 var updated = false
-                                songs.forEach { if (!playlist.songs.contains(it)) { 
-                                    playlist.songs.add(it); updated = true } 
+                                songs.forEach { if (!playlist.songs.contains(it)) {
+                                    playlist.songs.add(it); updated = true }
                                 }
                                 if (updated) {
                                     PlaylistManager.updatePlaylist(context, playlist)
@@ -1106,7 +1106,7 @@ fun AddSongsToPlaylistDialog(songs: List<Song>, onDismiss: () -> Unit) {
                                 } else {
                                     Toast.makeText(
                                         context,
-                                        stringResource(R.string.songs_already_in_playlist),
+                                        context.getString(R.string.songs_already_in_playlist),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
