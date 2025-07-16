@@ -69,6 +69,7 @@ import com.example.dsmusic.utils.PlaylistManager
 import com.example.dsmusic.model.Playlist
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -647,7 +648,10 @@ fun PlaylistScreen() {
                 contentColor = Color.White
             )
         ) {
-            Text("Créer une playlist")
+            Text(
+                "+ Créer une playlist",
+                fontSize = 20.sp
+            )
         }
 
         ListItem(
