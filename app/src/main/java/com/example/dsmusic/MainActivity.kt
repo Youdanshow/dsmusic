@@ -305,6 +305,7 @@ fun SongList(
     var actionsExpanded by remember { mutableStateOf(false) }
     var addDialogOpen by remember { mutableStateOf(false) }
     var createDialogOpen by remember { mutableStateOf(false) }
+    var settingsOpen by remember { mutableStateOf(false) }
 
     val sortedSongs = remember(songs, sortField, ascending) {
         val sorted = when (sortField) {
@@ -317,14 +318,14 @@ fun SongList(
         if (ascending) sorted else sorted.reversed()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (showFilter) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                var settingsOpen by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (showFilter) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                 if (selectionMode) {
                     IconButton(onClick = { selectionMode = false; selectedSongs.clear() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Retour", tint = Color.White)
@@ -333,12 +334,6 @@ fun SongList(
                     IconButton(onClick = { settingsOpen = true }) {
                         Icon(Icons.Default.Settings, contentDescription = "Paramètres", tint = Color.White)
                     }
-                }
-                if (settingsOpen) {
-                    SettingsScreen(
-                        onBack = { settingsOpen = false },
-                        onThemeSelected = onThemeSelected
-                    )
                 }
                 Box {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -461,6 +456,13 @@ fun SongList(
                 onDismiss = { createDialogOpen = false }
             )
         }
+    }
+
+    if (settingsOpen) {
+        SettingsScreen(
+            onBack = { settingsOpen = false },
+            onThemeSelected = onThemeSelected
+        )
     }
 }
 
