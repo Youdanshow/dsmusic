@@ -397,14 +397,14 @@ fun SongList(
                     }
                     DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.add_to_playlist)) },
+                            text = { Text(stringResource(R.string.add_to_playlist), color = Color.White) },
                             onClick = {
                                 actionsExpanded = false
                                 addDialogOpen = true
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Créer une playlist") },
+                            text = { Text("Créer une playlist", color = Color.White) },
                             onClick = {
                                 actionsExpanded = false
                                 createDialogOpen = true
@@ -749,14 +749,14 @@ fun PlaylistScreen() {
                                 }
                                 DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
                                     DropdownMenuItem(
-                                        text = { Text("Renommer") },
+                                        text = { Text("Renommer", color = Color.White) },
                                         onClick = {
                                             renameTarget = playlist.name
                                             menuFor = null
                                         }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text("Supprimer") },
+                                        text = { Text("Supprimer", color = Color.White) },
                                         onClick = {
                                             deleteTarget = playlist.name
                                             menuFor = null
@@ -793,7 +793,7 @@ fun PlaylistScreen() {
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                 ) {
-                    Text("Créer")
+                    Text("Créer", color = Color.White)
                 }
             },
             dismissButton = {
@@ -801,10 +801,10 @@ fun PlaylistScreen() {
                     onClick = { dialogOpen = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                 ) {
-                    Text("Annuler")
+                    Text("Annuler", color = Color.White)
                 }
             },
-            title = { Text("Nom de la playlist") },
+            title = { Text("Nom de la playlist", color = Color.White) },
             text = {
                 TextField(
                     value = newName,
@@ -829,23 +829,38 @@ fun PlaylistScreen() {
         AlertDialog(
             onDismissRequest = { renameTarget = null },
             confirmButton = {
-                TextButton(onClick = {
-                    val trimmed = renameText.trim()
-                    if (trimmed.isNotEmpty()) {
-                        PlaylistManager.renamePlaylist(context, name, trimmed)
-                        playlists = PlaylistManager.getAllPlaylists(context)
-                        renameTarget = null
-                    }
-                }) { Text("Renommer") }
+                TextButton(
+                    onClick = {
+                        val trimmed = renameText.trim()
+                        if (trimmed.isNotEmpty()) {
+                            PlaylistManager.renamePlaylist(context, name, trimmed)
+                            playlists = PlaylistManager.getAllPlaylists(context)
+                            renameTarget = null
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) { Text("Renommer", color = Color.White) }
             },
             dismissButton = {
-                TextButton(onClick = { renameTarget = null }) { Text("Annuler") }
+                TextButton(
+                    onClick = { renameTarget = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) { Text("Annuler", color = Color.White) }
             },
-            title = { Text("Renommer la playlist") },
+            title = { Text("Renommer la playlist", color = Color.White) },
             text = {
                 TextField(
                     value = renameText,
-                    onValueChange = { if (it.length <= 20) renameText = it }
+                    onValueChange = { if (it.length <= 20) renameText = it },
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    )
                 )
             }
         )
@@ -855,17 +870,23 @@ fun PlaylistScreen() {
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
             confirmButton = {
-                TextButton(onClick = {
-                    PlaylistManager.removePlaylist(context, name)
-                    playlists = PlaylistManager.getAllPlaylists(context)
-                    deleteTarget = null
-                }) { Text("Supprimer") }
+                TextButton(
+                    onClick = {
+                        PlaylistManager.removePlaylist(context, name)
+                        playlists = PlaylistManager.getAllPlaylists(context)
+                        deleteTarget = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) { Text("Supprimer", color = Color.White) }
             },
             dismissButton = {
-                TextButton(onClick = { deleteTarget = null }) { Text("Annuler") }
+                TextButton(
+                    onClick = { deleteTarget = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) { Text("Annuler", color = Color.White) }
             },
-            title = { Text("Supprimer \"$name\" ?") },
-            text = { Text("Cette action est définitive.") }
+            title = { Text("Supprimer \"$name\" ?", color = Color.White) },
+            text = { Text("Cette action est définitive.", color = Color.White) }
         )
     }
 
@@ -1009,25 +1030,33 @@ fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+            ) {
+                Text("Annuler", color = Color.White)
+            }
         },
-        title = { Text(stringResource(R.string.add_to_playlist)) },
+        title = { Text(stringResource(R.string.add_to_playlist), color = Color.White) },
         text = {
             if (playlists.isEmpty()) {
-                Text("Aucune playlist")
+                Text("Aucune playlist", color = Color.White)
             } else {
                 Column {
                     playlists.forEach { playlist ->
                         TextButton(
                             onClick = {
-                                playlist.songs.add(song)
-                                PlaylistManager.updatePlaylist(context, playlist)
-                                Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                if (!playlist.songs.contains(song)) {
+                                    playlist.songs.add(song)
+                                    PlaylistManager.updatePlaylist(context, playlist)
+                                    Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                }
                                 onDismiss()
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                         ) {
-                            Text(playlist.name)
+                            Text(playlist.name, color = Color.White)
                         }
                     }
                 }
@@ -1045,25 +1074,36 @@ fun AddSongsToPlaylistDialog(songs: List<Song>, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annuler") }
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+            ) {
+                Text("Annuler", color = Color.White)
+            }
         },
-        title = { Text(stringResource(R.string.add_to_playlist)) },
+        title = { Text(stringResource(R.string.add_to_playlist), color = Color.White) },
         text = {
             if (playlists.isEmpty()) {
-                Text("Aucune playlist")
+                Text("Aucune playlist", color = Color.White)
             } else {
                 Column {
                     playlists.forEach { playlist ->
                         TextButton(
                             onClick = {
-                                songs.forEach { playlist.songs.add(it) }
-                                PlaylistManager.updatePlaylist(context, playlist)
-                                Toast.makeText(context, "Ajouté à ${'$'}{playlist.name}", Toast.LENGTH_SHORT).show()
+                                var updated = false
+                                songs.forEach { if (!playlist.songs.contains(it)) {
+                                    playlist.songs.add(it); updated = true }
+                                }
+                                if (updated) {
+                                    PlaylistManager.updatePlaylist(context, playlist)
+                                    Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                }
                                 onDismiss()
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
                         ) {
-                            Text(playlist.name)
+                            Text(playlist.name, color = Color.White)
                         }
                     }
                 }
@@ -1091,12 +1131,12 @@ fun CreatePlaylistWithSongsDialog(songs: List<Song>, onDismiss: () -> Unit) {
                     }
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-            ) { Text("Créer") }
+            ) { Text("Créer", color = Color.White) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = Color.White)) { Text("Annuler") }
+            TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = Color.White)) { Text("Annuler", color = Color.White) }
         },
-        title = { Text("Nom de la playlist") },
+        title = { Text("Nom de la playlist", color = Color.White) },
         text = {
             TextField(
                 value = name,
@@ -1129,7 +1169,7 @@ fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.remove_from_playlist)) },
+                        text = { Text(stringResource(R.string.remove_from_playlist), color = Color.White) },
                         onClick = {
                             menuExpanded = false
                             onRemove()
@@ -1168,7 +1208,7 @@ fun PlaylistSongsScreen(
         }
         if (songs.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Aucune musique")
+                Text("Aucune musique", color = Color.White)
             }
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
