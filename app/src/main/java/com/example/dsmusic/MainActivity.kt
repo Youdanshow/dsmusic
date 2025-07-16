@@ -318,6 +318,8 @@ fun SongList(
         if (ascending) sorted else sorted.reversed()
     }
 
+    // Wrap the entire screen in a Box so overlays like the settings menu
+    // do not shift the underlying content such as the gear icon
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (showFilter) {
