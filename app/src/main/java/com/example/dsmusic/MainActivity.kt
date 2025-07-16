@@ -1050,6 +1050,12 @@ fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
                                     playlist.songs.add(song)
                                     PlaylistManager.updatePlaylist(context, playlist)
                                     Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        stringResource(R.string.song_already_in_playlist),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                                 onDismiss()
                             },
@@ -1091,12 +1097,18 @@ fun AddSongsToPlaylistDialog(songs: List<Song>, onDismiss: () -> Unit) {
                         TextButton(
                             onClick = {
                                 var updated = false
-                                songs.forEach { if (!playlist.songs.contains(it)) {
-                                    playlist.songs.add(it); updated = true }
+                                songs.forEach { if (!playlist.songs.contains(it)) { 
+                                    playlist.songs.add(it); updated = true } 
                                 }
                                 if (updated) {
                                     PlaylistManager.updatePlaylist(context, playlist)
                                     Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        stringResource(R.string.songs_already_in_playlist),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                                 onDismiss()
                             },
