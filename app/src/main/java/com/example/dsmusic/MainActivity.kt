@@ -13,6 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.foundation.layout.Column
@@ -868,6 +869,7 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
     HorizontalDivider()
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongItem(
     song: Song,
