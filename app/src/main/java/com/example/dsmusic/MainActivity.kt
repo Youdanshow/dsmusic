@@ -799,7 +799,6 @@ fun PlaylistScreen() {
         )
     }
     }
-    }
 
     songsFor?.let { playlist ->
         PlaylistSongsScreen(
