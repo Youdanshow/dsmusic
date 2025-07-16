@@ -637,7 +637,8 @@ fun PlaylistScreen() {
         renameText = renameTarget ?: ""
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    if (songsFor == null) {
+        Column(modifier = Modifier.fillMaxSize()) {
         Button(
             onClick = { dialogOpen = true },
             modifier = Modifier
@@ -796,6 +797,8 @@ fun PlaylistScreen() {
             title = { Text("Supprimer \"$name\" ?") },
             text = { Text("Cette action est définitive.") }
         )
+    }
+    }
     }
 
     songsFor?.let { playlist ->
