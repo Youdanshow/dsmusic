@@ -637,70 +637,72 @@ fun PlaylistScreen() {
         renameText = renameTarget ?: ""
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Button(
-            onClick = { dialogOpen = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = Color.White
-            )
-        ) {
-            Text(
-                "+ Créer une playlist",
-                fontSize = 20.sp
-            )
-        }
-
-        ListItem(
-            headlineContent = { Text("Playlists") },
-            trailingContent = {
-                IconButton(onClick = { expanded = !expanded }) {
-                    val icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                    Icon(icon, contentDescription = null, tint = Color.White)
-                }
-            },
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-        )
-        HorizontalDivider()
-        if (expanded) {
-            playlists.forEach { playlist ->
-                ListItem(
-                    headlineContent = { Text(playlist.name) },
-                    trailingContent = {
-                        Box {
-                            IconButton(onClick = { menuFor = playlist.name }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
-                            }
-                            DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
-                                DropdownMenuItem(
-                                    text = { Text("Renommer") },
-                                    onClick = {
-                                        renameTarget = playlist.name
-                                        menuFor = null
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Supprimer") },
-                                    onClick = {
-                                        deleteTarget = playlist.name
-                                        menuFor = null
-                                    }
-                                )
-                            }
-                        }
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { songsFor = playlist }
+    if (songsFor == null) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Button(
+                onClick = { dialogOpen = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
                 )
-                HorizontalDivider()
+            ) {
+                Text(
+                    "+ Créer une playlist",
+                    fontSize = 20.sp
+                )
+            }
+
+            ListItem(
+                headlineContent = { Text("Playlists") },
+                trailingContent = {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        val icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
+                        Icon(icon, contentDescription = null, tint = Color.White)
+                    }
+                },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded }
+            )
+            HorizontalDivider()
+            if (expanded) {
+                playlists.forEach { playlist ->
+                    ListItem(
+                        headlineContent = { Text(playlist.name) },
+                        trailingContent = {
+                            Box {
+                                IconButton(onClick = { menuFor = playlist.name }) {
+                                    Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
+                                }
+                                DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
+                                    DropdownMenuItem(
+                                        text = { Text("Renommer") },
+                                        onClick = {
+                                            renameTarget = playlist.name
+                                            menuFor = null
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Supprimer") },
+                                        onClick = {
+                                            deleteTarget = playlist.name
+                                            menuFor = null
+                                        }
+                                    )
+                                }
+                            }
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { songsFor = playlist }
+                    )
+                    HorizontalDivider()
+                }
             }
         }
     }
@@ -966,6 +968,7 @@ fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
                 }
             }
         },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
