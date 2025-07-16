@@ -351,7 +351,7 @@ fun SongList(
                         }
                         if (selectionMode) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("${'$'}{selectedSongs.size}", color = Color.White, fontSize = 12.sp)
+                                Text(selectedSongs.size.toString(), color = Color.White, fontSize = 12.sp)
                                 IconButton(onClick = { actionsExpanded = true }, modifier = Modifier.size(20.dp)) {
                                     Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.White)
                                 }
