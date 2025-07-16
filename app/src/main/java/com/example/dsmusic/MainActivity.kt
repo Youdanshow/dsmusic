@@ -301,6 +301,9 @@ fun SongList(
 
     val selectedSongs = remember { mutableStateListOf<Song>() }
     var selectionMode by remember { mutableStateOf(false) }
+    var actionsExpanded by remember { mutableStateOf(false) }
+    var addDialogOpen by remember { mutableStateOf(false) }
+    var createDialogOpen by remember { mutableStateOf(false) }
 
     val sortedSongs = remember(songs, sortField, ascending) {
         val sorted = when (sortField) {
@@ -346,7 +349,12 @@ fun SongList(
                             )
                         }
                         if (selectionMode) {
-                            Text("${selectedSongs.size}", color = Color.White, fontSize = 12.sp)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("${'$'}{selectedSongs.size}", color = Color.White, fontSize = 12.sp)
+                                IconButton(onClick = { actionsExpanded = true }, modifier = Modifier.size(20.dp)) {
+                                    Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.White)
+                                }
+                            }
                         }
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
@@ -386,6 +394,22 @@ fun SongList(
                             modifier = Modifier.background(Color.Transparent)
                         )
                     }
+                    DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.add_to_playlist)) },
+                            onClick = {
+                                actionsExpanded = false
+                                addDialogOpen = true
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Créer une playlist") },
+                            onClick = {
+                                actionsExpanded = false
+                                createDialogOpen = true
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -421,6 +445,20 @@ fun SongList(
                     }
                 )
             }
+        }
+
+        if (addDialogOpen) {
+            AddSongsToPlaylistDialog(
+                songs = selectedSongs.toList(),
+                onDismiss = { addDialogOpen = false }
+            )
+        }
+
+        if (createDialogOpen) {
+            CreatePlaylistWithSongsDialog(
+                songs = selectedSongs.toList(),
+                onDismiss = { createDialogOpen = false }
+            )
         }
     }
 }
@@ -993,6 +1031,85 @@ fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
                     }
                 }
             }
+        }
+    )
+}
+
+@Composable
+fun AddSongsToPlaylistDialog(songs: List<Song>, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val playlists = remember { PlaylistManager.getAllPlaylists(context) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        },
+        title = { Text(stringResource(R.string.add_to_playlist)) },
+        text = {
+            if (playlists.isEmpty()) {
+                Text("Aucune playlist")
+            } else {
+                Column {
+                    playlists.forEach { playlist ->
+                        TextButton(
+                            onClick = {
+                                songs.forEach { playlist.songs.add(it) }
+                                PlaylistManager.updatePlaylist(context, playlist)
+                                Toast.makeText(context, "Ajouté à ${'$'}{playlist.name}", Toast.LENGTH_SHORT).show()
+                                onDismiss()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(playlist.name)
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun CreatePlaylistWithSongsDialog(songs: List<Song>, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var name by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val trimmed = name.trim()
+                    if (trimmed.isNotEmpty()) {
+                        val playlist = Playlist(trimmed, songs.toMutableList())
+                        PlaylistManager.addPlaylist(context, playlist)
+                        Toast.makeText(context, "Playlist créée", Toast.LENGTH_SHORT).show()
+                        onDismiss()
+                    }
+                },
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+            ) { Text("Créer") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = Color.White)) { Text("Annuler") }
+        },
+        title = { Text("Nom de la playlist") },
+        text = {
+            TextField(
+                value = name,
+                onValueChange = { if (it.length <= 20) name = it },
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White,
+                    cursorColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
+                )
+            )
         }
     )
 }
