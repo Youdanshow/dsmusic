@@ -1011,7 +1011,7 @@ fun PlaylistSongsScreen(
 fun SettingsScreen(onBack: () -> Unit, onThemeSelected: (Int) -> Unit) {
     var themeMenuExpanded by remember { mutableStateOf(false) }
 
-    Surface(modifier = Modifier.fillMaxSize(), color = Color.Black.copy(alpha = 0.8f)) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
