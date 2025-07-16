@@ -12,6 +12,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.Checkbox
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -295,6 +298,9 @@ fun SongList(
     var ascending by remember { mutableStateOf(true) }
     var menuExpanded by remember { mutableStateOf(false) }
 
+    val selectedSongs = remember { mutableStateListOf<Song>() }
+    var selectionMode by remember { mutableStateOf(false) }
+
     val sortedSongs = remember(songs, sortField, ascending) {
         val sorted = when (sortField) {
             SortField.TITLE -> songs.sortedBy { it.title }
@@ -311,10 +317,17 @@ fun SongList(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 var settingsOpen by remember { mutableStateOf(false) }
-                IconButton(onClick = { settingsOpen = true }) {
-                    Icon(Icons.Default.Settings, contentDescription = "Paramètres", tint = Color.White)
+                if (selectionMode) {
+                    IconButton(onClick = { selectionMode = false; selectedSongs.clear() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour", tint = Color.White)
+                    }
+                } else {
+                    IconButton(onClick = { settingsOpen = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Paramètres", tint = Color.White)
+                    }
                 }
                 if (settingsOpen) {
                     SettingsScreen(
@@ -323,12 +336,17 @@ fun SongList(
                     )
                 }
                 Box {
-                    IconButton(onClick = { menuExpanded = true }) {
-                    Icon(
-                        Icons.Default.FilterList,
-                        contentDescription = "Filtrer",
-                        tint = Color.White
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(
+                                Icons.Default.FilterList,
+                                contentDescription = "Filtrer",
+                                tint = Color.White
+                            )
+                        }
+                        if (selectionMode) {
+                            Text("${selectedSongs.size}", color = Color.White, fontSize = 12.sp)
+                        }
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         SortField.values().forEach { field ->
@@ -372,10 +390,34 @@ fun SongList(
         }
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(sortedSongs) { index, song ->
+                val isSel = selectedSongs.contains(song)
                 SongItem(
                     song = song,
-                    onClick = { onSongClick(song, index, sortedSongs) },
-                    isCurrent = song.uri == currentSong?.uri
+                    onClick = {
+                        if (selectionMode) {
+                            if (isSel) selectedSongs.remove(song) else selectedSongs.add(song)
+                            if (selectedSongs.isEmpty()) selectionMode = false
+                        } else {
+                            onSongClick(song, index, sortedSongs)
+                        }
+                    },
+                    isCurrent = song.uri == currentSong?.uri,
+                    selectionMode = selectionMode,
+                    isSelected = isSel,
+                    onSelectionChange = { checked ->
+                        if (checked) {
+                            if (!isSel) selectedSongs.add(song)
+                        } else {
+                            selectedSongs.remove(song)
+                        }
+                        if (selectedSongs.isEmpty()) selectionMode = false
+                    },
+                    onLongClick = {
+                        if (!selectionMode) {
+                            selectionMode = true
+                            selectedSongs.add(song)
+                        }
+                    }
                 )
             }
         }
@@ -827,7 +869,15 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
+fun SongItem(
+    song: Song,
+    onClick: () -> Unit,
+    isCurrent: Boolean,
+    selectionMode: Boolean = false,
+    isSelected: Boolean = false,
+    onSelectionChange: (Boolean) -> Unit = {},
+    onLongClick: () -> Unit = {}
+) {
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -851,26 +901,39 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
                 color = if (isCurrent) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
+        leadingContent = {
+            if (selectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onSelectionChange(it) }
+                )
+            }
+        },
         trailingContent = {
-            Box {
-                IconButton(onClick = { menuExpanded = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
-                }
-                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.add_to_playlist)) },
-                        onClick = {
-                            menuExpanded = false
-                            showDialog = true
-                        }
-                    )
+            if (!selectionMode) {
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
+                    }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.add_to_playlist)) },
+                            onClick = {
+                                menuExpanded = false
+                                showDialog = true
+                            }
+                        )
+                    }
                 }
             }
         },
         colors = colors,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     )
 
     if (showDialog) {
