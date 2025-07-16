@@ -641,7 +641,11 @@ fun PlaylistScreen() {
             onClick = { dialogOpen = true },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White
+            )
         ) {
             Text("Créer une playlist")
         }
