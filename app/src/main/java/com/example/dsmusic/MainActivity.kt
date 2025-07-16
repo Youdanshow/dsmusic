@@ -315,8 +315,8 @@ fun SongList(
                     Icon(Icons.Default.Settings, contentDescription = "Paramètres", tint = Color.White)
                 }
                 if (settingsOpen) {
-                    SettingsDialog(
-                        onDismiss = { settingsOpen = false },
+                    SettingsScreen(
+                        onBack = { settingsOpen = false },
                         onThemeSelected = onThemeSelected
                     )
                 }
@@ -1006,53 +1006,53 @@ fun PlaylistSongsScreen(
 }
 
 @Composable
-fun SettingsDialog(onDismiss: () -> Unit, onThemeSelected: (Int) -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onThemeSelected: (Int) -> Unit) {
     var themeMenuExpanded by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Fermer") }
-        },
-        title = { Text("Paramètres") },
-        text = {
-            Column {
-                Box {
-                    Button(
-                        onClick = { themeMenuExpanded = true },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("Changer de thème")
-                    }
-                    DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text("Thème 1", color = Color.White) },
-                            onClick = { onThemeSelected(1); themeMenuExpanded = false },
-                            modifier = Modifier.background(Color.Transparent)
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Thème 2", color = Color.White) },
-                            onClick = { onThemeSelected(2); themeMenuExpanded = false },
-                            modifier = Modifier.background(Color.Transparent)
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Thème 3", color = Color.White) },
-                            onClick = { onThemeSelected(3); themeMenuExpanded = false },
-                            modifier = Modifier.background(Color.Transparent)
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Thème 4", color = Color.White) },
-                            onClick = { onThemeSelected(4); themeMenuExpanded = false },
-                            modifier = Modifier.background(Color.Transparent)
-                        )
-                    }
+    Surface(modifier = Modifier.fillMaxSize(), color = Color.Black.copy(alpha = 0.8f)) {
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Retour", tint = Color.White)
+                }
+                Text("Param\u00e8tres", color = Color.White, style = MaterialTheme.typography.titleLarge)
+            }
+            Spacer(Modifier.height(16.dp))
+            Box {
+                Button(
+                    onClick = { themeMenuExpanded = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Changer de th\u00e8me")
+                }
+                DropdownMenu(expanded = themeMenuExpanded, onDismissRequest = { themeMenuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Th\u00e8me 1", color = Color.White) },
+                        onClick = { onThemeSelected(1); themeMenuExpanded = false },
+                        modifier = Modifier.background(Color.Transparent)
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Th\u00e8me 2", color = Color.White) },
+                        onClick = { onThemeSelected(2); themeMenuExpanded = false },
+                        modifier = Modifier.background(Color.Transparent)
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Th\u00e8me 3", color = Color.White) },
+                        onClick = { onThemeSelected(3); themeMenuExpanded = false },
+                        modifier = Modifier.background(Color.Transparent)
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Th\u00e8me 4", color = Color.White) },
+                        onClick = { onThemeSelected(4); themeMenuExpanded = false },
+                        modifier = Modifier.background(Color.Transparent)
+                    )
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
