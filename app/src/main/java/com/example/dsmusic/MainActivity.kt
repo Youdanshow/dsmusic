@@ -821,8 +821,18 @@ fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
     )
 
     ListItem(
-        headlineContent = { Text(song.title) },
-        supportingContent = { Text(song.artist) },
+        headlineContent = {
+            Text(
+                song.title,
+                color = if (isCurrent) Color.White else MaterialTheme.colorScheme.onSurface
+            )
+        },
+        supportingContent = {
+            Text(
+                song.artist,
+                color = if (isCurrent) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
         trailingContent = {
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
@@ -909,8 +919,8 @@ fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     ListItem(
-        headlineContent = { Text(song.title) },
-        supportingContent = { Text(song.artist) },
+        headlineContent = { Text(song.title, color = Color.White) },
+        supportingContent = { Text(song.artist, color = Color.White) },
         trailingContent = {
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
@@ -948,7 +958,11 @@ fun PlaylistSongsScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
             }
-            Text(playlist.name, style = MaterialTheme.typography.titleLarge)
+            Text(
+                playlist.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
+            )
         }
         if (songs.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
