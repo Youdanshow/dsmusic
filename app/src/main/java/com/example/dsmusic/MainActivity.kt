@@ -1026,8 +1026,16 @@ fun MiniPlayer(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(song.title, style = MaterialTheme.typography.bodyLarge)
-                    Text(song.artist, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        song.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
+                    Text(
+                        song.artist,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White
+                    )
                 }
                 IconButton(onClick = onShuffle) {
                     val tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
