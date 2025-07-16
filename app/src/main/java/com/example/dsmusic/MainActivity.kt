@@ -709,25 +709,46 @@ fun PlaylistScreen() {
         AlertDialog(
             onDismissRequest = { dialogOpen = false },
             confirmButton = {
-                TextButton(onClick = {
-                    val trimmed = newName.trim()
-                    if (trimmed.isNotEmpty()) {
-                        val playlist = Playlist(trimmed, mutableListOf())
-                        PlaylistManager.addPlaylist(context, playlist)
-                        playlists = PlaylistManager.getAllPlaylists(context)
-                        newName = ""
-                        dialogOpen = false
-                    }
-                }) { Text("Créer") }
+                TextButton(
+                    onClick = {
+                        val trimmed = newName.trim()
+                        if (trimmed.isNotEmpty()) {
+                            val playlist = Playlist(trimmed, mutableListOf())
+                            PlaylistManager.addPlaylist(context, playlist)
+                            playlists = PlaylistManager.getAllPlaylists(context)
+                            newName = ""
+                            dialogOpen = false
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text("Créer")
+                }
             },
             dismissButton = {
-                TextButton(onClick = { dialogOpen = false }) { Text("Annuler") }
+                TextButton(
+                    onClick = { dialogOpen = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text("Annuler")
+                }
             },
             title = { Text("Nom de la playlist") },
             text = {
                 TextField(
                     value = newName,
-                    onValueChange = { if (it.length <= 20) newName = it }
+                    onValueChange = { if (it.length <= 20) newName = it },
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    )
                 )
             }
         )
