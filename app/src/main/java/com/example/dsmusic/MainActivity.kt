@@ -968,6 +968,7 @@ fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
                 }
             }
         },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
