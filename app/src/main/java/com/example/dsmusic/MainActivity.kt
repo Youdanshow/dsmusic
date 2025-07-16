@@ -52,6 +52,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
@@ -68,10 +69,12 @@ import com.example.dsmusic.utils.PlaylistManager
 import com.example.dsmusic.model.Playlist
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.core.view.WindowCompat
+import android.widget.Toast
 import android.graphics.Color as AndroidColor
 
 class MainActivity : ComponentActivity() {
@@ -484,7 +487,7 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            placeholder = { Text("Rechercher") },
+            placeholder = { Text("Rechercher", color = Color.White) },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
@@ -498,7 +501,7 @@ fun SearchScreen(
                             trailingContent = {
                                 IconButton(onClick = { artistsExpanded = !artistsExpanded }) {
                                     val icon = if (artistsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                                    Icon(icon, contentDescription = null)
+                                    Icon(icon, contentDescription = null, tint = Color.White)
                                 }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -521,7 +524,7 @@ fun SearchScreen(
                             trailingContent = {
                                 IconButton(onClick = { albumsExpanded = !albumsExpanded }) {
                                     val icon = if (albumsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                                    Icon(icon, contentDescription = null)
+                                    Icon(icon, contentDescription = null, tint = Color.White)
                                 }
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -543,7 +546,7 @@ fun SearchScreen(
                         trailingContent = {
                             IconButton(onClick = { songsExpanded = !songsExpanded }) {
                                 val icon = if (songsExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                                Icon(icon, contentDescription = null)
+                                Icon(icon, contentDescription = null, tint = Color.White)
                             }
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -566,7 +569,7 @@ fun SearchScreen(
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         IconButton(onClick = { selectedArtist = null }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                         }
                         Text(text = selectedArtist ?: "")
                     }
@@ -591,7 +594,7 @@ fun SearchScreen(
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         IconButton(onClick = { selectedAlbum = null }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                         }
                         Text(text = selectedAlbum ?: "")
                     }
@@ -623,11 +626,12 @@ fun PlaylistScreen() {
     var playlists by remember { mutableStateOf(PlaylistManager.getAllPlaylists(context)) }
     var dialogOpen by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
     var menuFor by remember { mutableStateOf<String?>(null) }
     var renameTarget by remember { mutableStateOf<String?>(null) }
     var renameText by remember { mutableStateOf("") }
     var deleteTarget by remember { mutableStateOf<String?>(null) }
+    var songsFor by remember { mutableStateOf<Playlist?>(null) }
 
     LaunchedEffect(renameTarget) {
         renameText = renameTarget ?: ""
@@ -638,9 +642,16 @@ fun PlaylistScreen() {
             onClick = { dialogOpen = true },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White
+            )
         ) {
-            Text("Créer une playlist")
+            Text(
+                "+ Créer une playlist",
+                fontSize = 20.sp
+            )
         }
 
         ListItem(
@@ -648,7 +659,7 @@ fun PlaylistScreen() {
             trailingContent = {
                 IconButton(onClick = { expanded = !expanded }) {
                     val icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore
-                    Icon(icon, contentDescription = null)
+                    Icon(icon, contentDescription = null, tint = Color.White)
                 }
             },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -664,7 +675,7 @@ fun PlaylistScreen() {
                     trailingContent = {
                         Box {
                             IconButton(onClick = { menuFor = playlist.name }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = null)
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
                             }
                             DropdownMenu(expanded = menuFor == playlist.name, onDismissRequest = { menuFor = null }) {
                                 DropdownMenuItem(
@@ -685,7 +696,9 @@ fun PlaylistScreen() {
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { songsFor = playlist }
                 )
                 HorizontalDivider()
             }
@@ -696,25 +709,46 @@ fun PlaylistScreen() {
         AlertDialog(
             onDismissRequest = { dialogOpen = false },
             confirmButton = {
-                TextButton(onClick = {
-                    val trimmed = newName.trim()
-                    if (trimmed.isNotEmpty()) {
-                        val playlist = Playlist(trimmed, mutableListOf())
-                        PlaylistManager.addPlaylist(context, playlist)
-                        playlists = PlaylistManager.getAllPlaylists(context)
-                        newName = ""
-                        dialogOpen = false
-                    }
-                }) { Text("Créer") }
+                TextButton(
+                    onClick = {
+                        val trimmed = newName.trim()
+                        if (trimmed.isNotEmpty()) {
+                            val playlist = Playlist(trimmed, mutableListOf())
+                            PlaylistManager.addPlaylist(context, playlist)
+                            playlists = PlaylistManager.getAllPlaylists(context)
+                            newName = ""
+                            dialogOpen = false
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text("Créer")
+                }
             },
             dismissButton = {
-                TextButton(onClick = { dialogOpen = false }) { Text("Annuler") }
+                TextButton(
+                    onClick = { dialogOpen = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text("Annuler")
+                }
             },
             title = { Text("Nom de la playlist") },
             text = {
                 TextField(
                     value = newName,
-                    onValueChange = { if (it.length <= 20) newName = it }
+                    onValueChange = { if (it.length <= 20) newName = it },
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        cursorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    )
                 )
             }
         )
@@ -763,6 +797,19 @@ fun PlaylistScreen() {
             text = { Text("Cette action est définitive.") }
         )
     }
+
+    songsFor?.let { playlist ->
+        PlaylistSongsScreen(
+            playlist = playlist,
+            onBack = {
+                playlists = PlaylistManager.getAllPlaylists(context)
+                songsFor = null
+            },
+            onUpdate = {
+                playlists = PlaylistManager.getAllPlaylists(context)
+            }
+        )
+    }
 }
 @Composable
 fun AlbumItem(album: String, onClick: () -> Unit) {
@@ -792,19 +839,55 @@ fun ArtistItem(artist: String, onClick: () -> Unit) {
 
 @Composable
 fun SongItem(song: Song, onClick: () -> Unit, isCurrent: Boolean) {
+    val context = LocalContext.current
+    var menuExpanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
     val colors = ListItemDefaults.colors(
         containerColor = if (isCurrent) MaterialTheme.colorScheme.primary else Color.Transparent,
         headlineColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurface,
-        supportingColor = if (isCurrent) TextWhite else MaterialTheme.colorScheme.onSurfaceVariant
+        supportingColor = TextWhite
     )
+
     ListItem(
-        headlineContent = { Text(song.title) },
-        supportingContent = { Text(song.artist) },
+        headlineContent = {
+            Text(
+                song.title,
+                color = if (isCurrent) Color.White else MaterialTheme.colorScheme.onSurface
+            )
+        },
+        supportingContent = {
+            Text(
+                song.artist,
+                color = if (isCurrent) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        trailingContent = {
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.add_to_playlist)) },
+                        onClick = {
+                            menuExpanded = false
+                            showDialog = true
+                        }
+                    )
+                }
+            }
+        },
         colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
     )
+
+    if (showDialog) {
+        AddToPlaylistDialog(song = song, onDismiss = { showDialog = false })
+    }
+
     HorizontalDivider()
 }
 
@@ -822,6 +905,116 @@ fun togglePlayback(context: android.content.Context) {
         action = MusicService.ACTION_TOGGLE_PLAY
     }
     ContextCompat.startForegroundService(context, intent)
+}
+
+@Composable
+fun AddToPlaylistDialog(song: Song, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val playlists = remember { PlaylistManager.getAllPlaylists(context) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        },
+        title = { Text(stringResource(R.string.add_to_playlist)) },
+        text = {
+            if (playlists.isEmpty()) {
+                Text("Aucune playlist")
+            } else {
+                Column {
+                    playlists.forEach { playlist ->
+                        TextButton(
+                            onClick = {
+                                playlist.songs.add(song)
+                                PlaylistManager.updatePlaylist(context, playlist)
+                                Toast.makeText(context, "Ajouté à ${playlist.name}", Toast.LENGTH_SHORT).show()
+                                onDismiss()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(playlist.name)
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun PlaylistSongItem(song: Song, onClick: () -> Unit, onRemove: () -> Unit) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        headlineContent = { Text(song.title, color = Color.White) },
+        supportingContent = { Text(song.artist, color = Color.White) },
+        trailingContent = {
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.remove_from_playlist)) },
+                        onClick = {
+                            menuExpanded = false
+                            onRemove()
+                        }
+                    )
+                }
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    )
+    HorizontalDivider()
+}
+
+@Composable
+fun PlaylistSongsScreen(
+    playlist: Playlist,
+    onBack: () -> Unit,
+    onUpdate: () -> Unit
+) {
+    val context = LocalContext.current
+    var songs by remember { mutableStateOf(playlist.songs.toMutableList()) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+            }
+            Text(
+                playlist.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
+            )
+        }
+        if (songs.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Aucune musique")
+            }
+        } else {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                itemsIndexed(songs) { index, song ->
+                    PlaylistSongItem(
+                        song = song,
+                        onClick = { startPlayback(context, songs, index) },
+                        onRemove = {
+                            val updated = songs.toMutableList()
+                            updated.remove(song)
+                            songs = updated
+                            PlaylistManager.updatePlaylist(context, playlist.copy(songs = updated))
+                            onUpdate()
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -862,23 +1055,31 @@ fun MiniPlayer(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(song.title, style = MaterialTheme.typography.bodyLarge)
-                    Text(song.artist, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        song.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
+                    Text(
+                        song.artist,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White
+                    )
                 }
                 IconButton(onClick = onShuffle) {
                     val tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle", tint = tint)
                 }
                 IconButton(onClick = onPrevious) {
-                    Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous")
+                    Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", tint = Color.White)
                 }
                 IconButton(onClick = onToggle) {
                     val icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow
                     val desc = if (isPlaying) "Pause" else "Play"
-                    Icon(icon, contentDescription = desc)
+                    Icon(icon, contentDescription = desc, tint = Color.White)
                 }
                 IconButton(onClick = onNext) {
-                    Icon(Icons.Filled.SkipNext, contentDescription = "Next")
+                    Icon(Icons.Filled.SkipNext, contentDescription = "Next", tint = Color.White)
                 }
                 IconButton(onClick = onRepeat) {
                     val icon = when (repeatMode) {

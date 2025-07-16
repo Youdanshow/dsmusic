@@ -13,7 +13,8 @@ fun DSMusicTheme(content: @Composable () -> Unit) {
         onPrimary = TextWhite,
         onSecondary = TextWhite,
         onBackground = TextWhite,
-        onSurface = TextWhite
+        onSurface = TextWhite,
+        onSurfaceVariant = TextWhite
     )
     MaterialTheme(
         colorScheme = colorScheme,
