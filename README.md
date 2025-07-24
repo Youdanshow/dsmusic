@@ -31,6 +31,11 @@ dsmusic est un lecteur audio Android écrit en Kotlin. L'application se concentr
 - MediaStore API pour l'indexation des fichiers
 - Jetpack Compose et Material3 pour l'interface
 
+## Dépendances
+- [Android Studio](https://developer.android.com/studio) pour éditer et construire le projet
+- [ADB](https://developer.android.com/tools/adb) pour interagir avec l'appareil
+- [Gradle](https://gradle.org/) pour le système de build
+
 ## Structure du projet
 ```bash
 /musicplayer
