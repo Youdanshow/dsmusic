@@ -78,9 +78,9 @@ dsmusic est un lecteur audio Android écrit en Kotlin. L'application se concentr
    ```
 6. En cas de problème de connexion USB :
    ```bash
-   <path-to-adb>/adb kill-server
-   <path-to-adb>/adb start-server
-   <path-to-adb>/adb devices
+   & <path-to-adb>/adb kill-server
+   & <path-to-adb>/adb start-server
+   & <path-to-adb>/adb devices
    ./gradlew installDebug
    ```
 6. Tester une branche du projet
