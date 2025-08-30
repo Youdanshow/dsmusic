@@ -74,6 +74,7 @@ import com.example.dsmusic.utils.MusicScanner
 import com.example.dsmusic.utils.PlaybackHolder
 import com.example.dsmusic.utils.ThemePreference
 import com.example.dsmusic.utils.PlaylistManager
+import com.example.dsmusic.utils.UserPreference
 import com.example.dsmusic.model.Playlist
 import com.google.gson.Gson
 import androidx.compose.ui.unit.dp
@@ -81,6 +82,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.style.TextAlign
 import androidx.core.view.WindowCompat
 import android.widget.Toast
 import android.graphics.Color as AndroidColor
@@ -134,6 +136,8 @@ fun MusicApp() {
     var repeatMode by remember { mutableStateOf(0) }
     var musicService by remember { mutableStateOf<MusicService?>(null) }
     var selectedTheme by rememberSaveable { mutableStateOf(ThemePreference.loadTheme(context)) }
+    var firstName by rememberSaveable { mutableStateOf(UserPreference.loadFirstName(context) ?: "") }
+    var lastName by rememberSaveable { mutableStateOf(UserPreference.loadLastName(context) ?: "") }
     val backgroundRes = when (selectedTheme) {
         1 -> R.drawable.back_1
         2 -> R.drawable.back_2
@@ -321,7 +325,6 @@ fun SongList(
         if (showFilter) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 var settingsOpen by remember { mutableStateOf(false) }
@@ -337,9 +340,22 @@ fun SongList(
                 if (settingsOpen) {
                     SettingsScreen(
                         onBack = { settingsOpen = false },
-                        onThemeSelected = onThemeSelected
+                        onThemeSelected = onThemeSelected,
+                        currentFirstName = firstName,
+                        currentLastName = lastName,
+                        onUserUpdate = { fn, ln ->
+                            firstName = fn
+                            lastName = ln
+                            UserPreference.saveUser(context, fn, ln)
+                        }
                     )
                 }
+                Text(
+                    firstName,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
                 Box {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         IconButton(onClick = { menuExpanded = true }) {
@@ -1243,8 +1259,16 @@ fun PlaylistSongsScreen(
 }
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit, onThemeSelected: (Int) -> Unit) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    onThemeSelected: (Int) -> Unit,
+    currentFirstName: String,
+    currentLastName: String,
+    onUserUpdate: (String, String) -> Unit
+) {
     var themeMenuExpanded by remember { mutableStateOf(false) }
+    var first by remember { mutableStateOf(currentFirstName) }
+    var last by remember { mutableStateOf(currentLastName) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -1253,6 +1277,49 @@ fun SettingsScreen(onBack: () -> Unit, onThemeSelected: (Int) -> Unit) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Retour", tint = Color.White)
                 }
                 Text("Param\u00e8tres", color = Color.White, style = MaterialTheme.typography.titleLarge)
+            }
+            Spacer(Modifier.height(16.dp))
+            OutlinedTextField(
+                value = first,
+                onValueChange = { first = it },
+                label = { Text("Pr\u00e9nom*", color = Color.White) },
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    cursorColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White
+                )
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = last,
+                onValueChange = { last = it },
+                label = { Text("Nom", color = Color.White) },
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    cursorColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White
+                )
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { onUserUpdate(first, last); onBack() },
+                enabled = first.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Enregistrer")
             }
             Spacer(Modifier.height(16.dp))
             Box {
